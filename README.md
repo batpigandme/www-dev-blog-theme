@@ -39,9 +39,27 @@ Ghost emits inconsistent (and often broken) footnote markup depending on how con
 
 If a heading (e.g., "Sources") directly precedes the absorbed notes, its text is adopted as the endnotes-section title.
 
-On viewports at least 1200px wide, each note is also mirrored into the right margin beside its reference as a sidenote. Margin copies are `aria-hidden` visual clones (non-tabbable, `id`-stripped); the endnotes remain the canonical, interactive copy at every viewport width.
+By default, footnotes are **endnotes only** — a plain numbered list at the end of the post, no margin mirroring. To also mirror each note into the right margin beside its reference (on viewports at least 1200px wide), tag the post `#sidenotes` in Ghost. `#`-prefixed tags are internal — hidden from readers, never shown on tag pages — but Ghost's built-in `post_class` helper still reflects them as a class on `<article>` (`tag-hash-sidenotes`), which `footnotes.js` checks; no template change is needed to use it. Margin copies are `aria-hidden` visual clones (non-tabbable, `id`-stripped); the endnotes remain the canonical, interactive copy at every viewport width, tagged or not.
+
+Author asides (below) are margin-eligible independently of this tag — writing an `<aside>` is already an explicit, per-element request for margin placement, unlike footnote mirroring, which is automatic and therefore opt-in.
+
+**Planned extension, not yet implemented**: per-footnote control (letting one note skip mirroring on an otherwise-`#sidenotes`-tagged post) is a possible follow-up, but is only reachable for hand-rolled notes — Ghost auto-generates and strips markup for the other three detection patterns, so there's no attribute an author could attach to those to carry a per-note override.
 
 **Known limitation**: a Markdown card containing *only* footnote definitions (no in-card references) may be dropped entirely by Ghost at render time and cannot be recovered client-side. When authoring in Markdown cards, paste the whole post as a single card.
+
+### What you'll see while editing vs. once published
+
+The theme's repair happens client-side, on the *published* page — the Ghost editor never runs `footnotes.js`. That gap matters differently depending on how a footnote entered the post:
+
+| How it was authored | While editing (Koenig) | Published, before JS runs | Published, after `footnotes.js` runs |
+|---|---|---|---|
+| Pasted into the Lexical editor | Looks essentially fine — numbered bracket refs (`[1]`) and a trailing numbered list with `↩︎` backlinks. **Nothing in the editor signals a problem.** | Broken: refs and backlinks carry no `href`/`id` at all — clicking does nothing. | Fully repaired, DPUB-ARIA, working links. |
+| Single Markdown card | Editing that card shows its own self-contained preview; nothing looks wrong. | **Already works** — Ghost's native markdown-it-footnote output has real, working `id`/`href` pairs. | Same links, upgraded to consistent numbering and DPUB-ARIA roles (plus a margin sidenote if the post is tagged `#sidenotes`). |
+| Footnotes split across multiple Markdown cards | Each card previews fine *on its own* — the problem only exists once cards are concatenated. | Broken: each card numbers its footnotes from 1, producing duplicate `id`s across cards and backlinks that jump to the wrong card. | Repaired — refs resolve to their own card's definition, renumbered sequentially across the whole post. |
+| Hand-rolled `<sup><a href="#fn-1" id="ref-1">` + `<p id="fn-1">` (HTML card) | The HTML card shows raw source, not a rendered preview, while editing. | Already works — you wrote the `id`/`href` pairs yourself. | Folded into the same numbering sequence as any other footnotes on the post, DPUB-ARIA added (plus a margin sidenote if the post is tagged `#sidenotes`). |
+| Literal `[^label]` / `[^label]: …` typed directly in the post body (not inside a Markdown card) | **The one case that looks obviously wrong while editing** — renders as plain visible bracket text, no special styling. | Still literal bracket text. | Converted into a real, working footnote. |
+
+**The practical takeaway**: previewing a post in the Ghost editor does not tell you whether its footnotes will actually work once published — the Lexical-paste case in particular can look completely normal while editing and still ship broken links. **Always check the live published page**, not just the editor preview, before considering a post done. Newsletter emails render the raw Ghost output with no client-side JS, so none of this repair applies there — footnote links will not work in emails regardless of authoring method.
 
 ### Asides
 
@@ -54,6 +72,8 @@ Authors can add a sidenote that is not a footnote with an HTML card:
 ```
 
 On wide viewports, the aside floats in the right margin; on narrow viewports (or if JavaScript is unavailable), it renders as a visually delineated in-flow block. Add `data-placement="inline"` to keep it a full-width callout at all widths. The `aria-label` may be customized (e.g., `aria-label="Historical note"`).
+
+**While editing**, the HTML card shows raw source, not a rendered preview — the aside will not visually look like a margin note in Koenig. It only takes on its margin position once published, when `footnotes.js` runs. **Verified against Ghost's actual rendering** (not just this theme's assumption about it): `@tryghost/kg-markdown-html-renderer`, the package Ghost itself uses, passes `<aside>` markup — including `class`, `role`, `aria-label`, and `data-placement` — through completely unmodified; nothing in Ghost's pipeline sanitizes or strips it.
 
 ## License
 

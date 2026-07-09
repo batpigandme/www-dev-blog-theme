@@ -35,10 +35,17 @@
 * 4. Literal text: `[^1]` and `[^1]: …` that never rendered.
 *
 * This script normalizes all of the above into a single endnotes section with
-* sequential numbering, bidirectional links, and DPUB-ARIA roles, and, on
-* wide viewports, mirrors each note into the right margin column beside its
-* reference. Margin copies are `aria-hidden` visual clones; the endnotes
-* remain the canonical, interactive copy at every viewport width.
+* sequential numbering, bidirectional links, and DPUB-ARIA roles. Footnotes
+* are endnotes-only by default; a post opts into also mirroring each note
+* into the right margin (on wide viewports) by tagging it `#sidenotes` in
+* Ghost (an internal tag — hidden from readers, surfaced to the theme via
+* Ghost's built-in `post_class` helper as `tag-hash-sidenotes` on `<article>`,
+* no template change required). Margin copies are `aria-hidden` visual
+* clones; the endnotes remain the canonical, interactive copy at every
+* viewport width. Author asides (`.gh-aside`) are margin-eligible
+* independently of this toggle — writing an `<aside>` is already an explicit
+* per-element request for margin placement, unlike automatic footnote
+* mirroring.
 */
 (function main() { // eslint-disable-line no-restricted-syntax
 	var SIDENOTE_MEDIA = '(min-width: 1200px)';
@@ -46,8 +53,11 @@
 	var SIDENOTE_GAP = 24;
 	var SIDENOTE_MAX_WIDTH = 240;
 	var SIDENOTE_SPACING = 12;
+	var SIDENOTES_TAG_CLASS = 'tag-hash-sidenotes';
 
 	var content;
+	var article;
+	var sidenotesEnabled;
 	var notes;
 	var refs;
 	var headingCandidate;
@@ -59,6 +69,8 @@
 	if ( !content ) {
 		return;
 	}
+	article = content.closest( '.gh-article' );
+	sidenotesEnabled = !!( article && article.classList.contains( SIDENOTES_TAG_CLASS ) );
 	notes = []; // [ { 'el': Element, 'html': string, 'number': int, 'refIds': [ string ] } ]
 	refs = []; // [ { 'wrapper': Element, 'note': object } ]
 	headingCandidate = null;
@@ -69,7 +81,7 @@
 		render();
 	}
 	asides = marginAsides();
-	if ( notes.length || asides.length ) {
+	if ( ( sidenotesEnabled && notes.length ) || asides.length ) {
 		mql = window.matchMedia( SIDENOTE_MEDIA );
 		if ( mql.addEventListener ) {
 			mql.addEventListener( 'change', relayout );
@@ -587,14 +599,16 @@
 
 		// Batch reads: desired vertical positions keyed by first reference (notes) or natural position (asides)...
 		entries = [];
-		for ( i = 0; i < notes.length; i++ ) {
-			ref = document.getElementById( notes[ i ].refIds[ 0 ] );
-			if ( ref ) {
-				entries.push({
-					'note': notes[ i ],
-					'el': null,
-					'top': ref.getBoundingClientRect().top - contentRect.top
-				});
+		if ( sidenotesEnabled ) {
+			for ( i = 0; i < notes.length; i++ ) {
+				ref = document.getElementById( notes[ i ].refIds[ 0 ] );
+				if ( ref ) {
+					entries.push({
+						'note': notes[ i ],
+						'el': null,
+						'top': ref.getBoundingClientRect().top - contentRect.top
+					});
+				}
 			}
 		}
 		for ( i = 0; i < asides.length; i++ ) {
