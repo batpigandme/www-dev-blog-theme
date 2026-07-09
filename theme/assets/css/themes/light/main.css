@@ -38,6 +38,13 @@ html[data-theme="light"] {
 	--stdlib-blue: #009cd7; /* #00aeef; */ /* original: 008bbf */
 
 	/*
+	* `--stdlib-orange` only reaches ~2.2:1 against the light background, short of the 3:1
+	* WCAG 2.4.11 non-text-contrast minimum needed when used as a standalone outline/indicator
+	* (as opposed to text-on-color or decorative uses, where the lighter shade is fine).
+	*/
+	--gh-target-highlight-color: #ae7728;
+
+	/*
 	* Links should be blue.
 	*/
 	--link-color: #0000ff;

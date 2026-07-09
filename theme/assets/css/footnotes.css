@@ -93,7 +93,7 @@
 .gh-footnotes li:target,
 .gh-fnref a:target {
 	background: var(--code-background-color);
-	outline: 2px solid var(--stdlib-orange);
+	outline: 2px solid var(--gh-target-highlight-color);
 	outline-offset: 2px;
 }
 
@@ -104,7 +104,7 @@
 */
 .gh-fnref:has(a:target) {
 	background: var(--code-background-color);
-	outline: 2px solid var(--stdlib-orange);
+	outline: 2px solid var(--gh-target-highlight-color);
 	outline-offset: 2px;
 }
 

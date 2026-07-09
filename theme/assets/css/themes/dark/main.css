@@ -37,6 +37,9 @@ html[data-theme="dark"] {
 	--stdlib-orange: #f0ad3e;
 	--stdlib-blue: #00aeef;
 
+	/* Already ~8:1 against the dark background, well past the 3:1 WCAG 2.4.11 minimum — reuse as-is. */
+	--gh-target-highlight-color: #f0ad3e;
+
 	/*
 	* Links should be blue.
 	*/

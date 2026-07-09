@@ -443,7 +443,8 @@
 
 		li = document.createElement( 'li' );
 		li.id = 'gh-fn-' + note.number;
-		li.setAttribute( 'role', 'doc-endnote' );
+
+		// `doc-endnote` is deprecated in DPUB-ARIA 1.1; the native `<li>` inside the `<ol>` already exposes an implicit `listitem` role.
 		li.innerHTML = note.html;
 		for ( i = 0; i < note.refIds.length; i++ ) {
 			a = document.createElement( 'a' );
