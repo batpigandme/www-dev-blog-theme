@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+BRANCH_CHECKOUT="$3"
+[ "$BRANCH_CHECKOUT" = "1" ] || exit 0
+CURRENT_BRANCH=$(git symbolic-ref --short HEAD 2>/dev/null)
+[ "$CURRENT_BRANCH" = "ai-config" ] && exit 0
+git rev-parse --verify ai-config >/dev/null 2>&1 || exit 0
+git checkout ai-config -- AGENTS.md 2>/dev/null
+git reset HEAD AGENTS.md 2>/dev/null
+exit 0
