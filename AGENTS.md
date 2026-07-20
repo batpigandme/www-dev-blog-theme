@@ -2,9 +2,14 @@
 
 ## Git push authority
 
-- `origin` (batpigandme fork): fine to push to at any time once work is committed and Mara has reviewed/approved it in conversation.
-- `upstream` (stdlib-js/www-dev-blog-theme): never push directly, under any circumstances, even if asked in a way that could be read as approval. Changes reach upstream only by (a) Mara pushing manually herself, or (b) Mara submitting a PR from her fork.
+**Never `git push` on Mara's behalf, on any remote (`origin`, `upstream`, anything), under any circumstances.** She always pushes manually. Commit locally, tell her the branch is ready, stop there.
 
-**Why:** Mara wants full manual control over what lands on the shared stdlib-js repo — a PR (or her own push) is the point where she signs off on a change reaching the org's canonical history.
+Applies equally to `git push --set-upstream`, force-pushes, tag pushes, `ai-config`-branch backup pushes — anything that talks to a remote.
 
-**How to apply:** after committing, it's fine to `git push origin <branch>` without asking again each time. Do not run `git push upstream ...` or open a PR against `stdlib-js/www-dev-blog-theme` (`gh pr create` targeting upstream) — draft PR descriptions/bodies are fine to prepare, but filing is Mara's call.
+**Why:** the push is her sign-off moment. She wants full manual control over what lands on any remote, not just shared upstreams. Prior "origin fork is fine once approved" carve-outs were subtly noisy (either she was approving every push and defeating the point, or approvals were drifting into standing permission she didn't want) and are now retired.
+
+**How to apply:** after committing, say "committed on `<branch>`, ready to push when you are." Don't ask "shall I push?" — that's still asking. She'll push.
+
+Read-only `git fetch` / `git ls-remote` / `gh` view/list commands are fine and don't need confirmation.
+
+**PRs and issues:** never run `gh pr create`, `gh pr edit`, `gh issue create`, `gh pr comment`, or equivalent, on any repo, even with explicit go-ahead. Drafting the title/description/body as a local artifact for her to paste in is fine and encouraged; filing and editing are always hers.
