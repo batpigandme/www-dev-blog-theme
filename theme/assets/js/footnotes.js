@@ -48,7 +48,7 @@
 * mirroring.
 */
 (function main() { // eslint-disable-line no-restricted-syntax
-	var SIDENOTE_MEDIA = '(min-width: 1200px)';
+	var SIDENOTE_MEDIA = '(min-width: 1120px)';
 	var SIDENOTE_MIN_GUTTER = 160;
 	var SIDENOTE_GAP = 24;
 	var SIDENOTE_MAX_WIDTH = 240;

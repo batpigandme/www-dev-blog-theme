@@ -117,7 +117,7 @@
 	display: none;
 }
 
-@media (min-width: 1200px) {
+@media (min-width: 1120px) {
 	.gh-sidenote {
 		display: block;
 		position: absolute;
@@ -180,7 +180,7 @@
 * class is added by footnotes.js only while it is actively laying out the
 * margin column, so a JS failure degrades gracefully to the in-flow block.
 */
-@media (min-width: 1200px) {
+@media (min-width: 1120px) {
 	.gh-content .gh-aside--margin {
 		position: absolute;
 
