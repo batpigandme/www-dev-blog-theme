@@ -223,31 +223,38 @@
 	}
 
 	/**
-	* Collects href-less Lexical refs, pairing displayed numbers with list items positionally.
+	* Collects href-less refs, pairing displayed numbers with list items positionally.
+	*
+	* Handles two nesting orientations, both of which arrive with attributes stripped:
+	*
+	* -   Lexical paste: `<a><sup>N</sup></a>` (anchor wraps sup).
+	* -   Theme's own output re-ingested through Ghost: `<sup class="gh-fnref"><a>N</a></sup>`
+	*     (sup wraps anchor). The equivalent shape with `.footnote-ref` covers stripped
+	*     markdown-card output too.
 	*
 	* @private
 	* @param {Map} byEl - note registry
-	* @param {Array} lists - qualifying Lexical note lists
+	* @param {Array} lists - qualifying Lexical-shaped note lists
 	*/
 	function collectLexicalRefs( byEl, lists ) {
-		var anchors;
+		var elements;
 		var list;
 		var sup;
+		var el;
 		var m;
 		var n;
-		var a;
 		var i;
 		var j;
 
 		if ( !lists.length ) {
 			return;
 		}
-		anchors = toArray( content.querySelectorAll( 'a:not([href]) > sup' ) );
-		for ( i = 0; i < anchors.length; i++ ) {
-			sup = anchors[ i ];
-			a = sup.parentElement;
+		elements = toArray( content.querySelectorAll( 'a:not([href]) > sup, sup.gh-fnref > a:not([href]), sup.footnote-ref > a:not([href])' ) );
+		for ( i = 0; i < elements.length; i++ ) {
+			el = elements[ i ];
+			sup = el.tagName === 'SUP' ? el : el.parentElement;
 			m = /^\[?(\d+)\]?$/.exec( sup.textContent.trim() );
-			if ( !m || insideContainer( a, { 'sections': [], 'lexical': lists } ) ) {
+			if ( !m || insideContainer( sup, { 'sections': [], 'lexical': lists } ) ) {
 				continue;
 			}
 			n = parseInt( m[ 1 ], 10 );
@@ -255,14 +262,14 @@
 			// Resolve against the nearest following list (per-card scoping), falling back to the last list...
 			list = null;
 			for ( j = 0; j < lists.length; j++ ) {
-				if ( follows( lists[ j ], a ) ) {
+				if ( follows( lists[ j ], sup ) ) {
 					list = lists[ j ];
 					break;
 				}
 			}
 			list = list || lists[ lists.length - 1 ];
 			if ( n >= 1 && n <= list.children.length ) {
-				addRef( byEl, refWrapper( a ), list.children[ n - 1 ] );
+				addRef( byEl, refWrapper( sup ), list.children[ n - 1 ] );
 			}
 		}
 	}
@@ -519,7 +526,7 @@
 		var target;
 		var prev;
 
-		container = el.closest( 'section.footnotes, div.footnotes' );
+		container = el.closest( 'section.footnotes, div.footnotes, section.gh-footnotes' );
 		target = el;
 		if ( el.tagName === 'LI' ) {
 			target = el.parentElement; // the <ol>
