@@ -18,12 +18,6 @@
 
 /*
 * Figure caption overrides.
-*
-* Loaded unminified, after `built/screen.css`, because the theme's CSS
-* minification pipeline is unavailable. `built/screen.css` inherits
-* `figcaption { text-align: center }` from the vendored Ghost Source theme
-* base; this file overrides it so the override survives a future rebuild
-* of `built/screen.css` from that base.
 */
 figcaption {
 	text-align: left;
