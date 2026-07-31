@@ -1,0 +1,71 @@
+{{!--
+
+@license Apache-2.0
+
+Copyright (c) 2026 The Stdlib Authors.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+--}}
+
+{{!--
+Without this template, pages fall back to post.hbs, which always renders
+the title and feature image regardless of the per-page "Show title and
+feature image" editor toggle. `@page.show_title_and_feature_image`
+defaults to `true` (docs.ghost.org/themes/helpers/data/page), so this
+gate is a no-op for existing pages unless that toggle has been switched
+off. Prev/next post navigation and the post byline are omitted, since
+neither applies to pages.
+--}}
+
+{{!< default}}
+
+{{#post}}
+
+<main id="gh-main" class="gh-main">
+	<article class="gh-article {{post_class}}">
+		{{#if @page.show_title_and_feature_image}}
+			<header class="gh-article-header gh-canvas">
+				<h1 class="gh-article-title">{{title}}</h1>
+
+				{{#if custom_excerpt}}
+					<p class="gh-article-excerpt">{{custom_excerpt}}</p>
+				{{/if}}
+
+				{{#if feature_image}}
+					<figure class="gh-article-image">
+						<img
+							srcset="{{img_url feature_image size="s"}} 300w,
+											{{img_url feature_image size="m"}} 720w,
+											{{img_url feature_image size="l"}} 960w,
+											{{img_url feature_image size="xl"}} 1200w,
+											{{img_url feature_image size="xxl"}} 2000w"
+							sizes="(max-width: 1200px) 100vw, 1200px"
+							src="{{img_url feature_image size="xl"}}"
+							alt="{{#if feature_image_alt}}{{feature_image_alt}}{{else}}{{title}}{{/if}}"
+						>
+						{{#if feature_image_caption}}
+							<figcaption>{{feature_image_caption}}</figcaption>
+						{{/if}}
+					</figure>
+				{{/if}}
+			</header>
+		{{/if}}
+
+		<div class="gh-content gh-canvas">
+			{{content}}
+		</div>
+	</article>
+</main>
+
+{{/post}}
