@@ -104,7 +104,7 @@ limitations under the License.
 				<h2 id="gh-citation-heading" class="gh-citation-heading">Cite this post</h2>
 
 				<div class="gh-citation-block">
-					<pre class="gh-citation-text" data-citation-format="apa"><code>{{#has author="count:>1"}}{{#foreach authors}}{{#if @first}}{{name}}{{else if @last}} &amp; {{name}}{{else}}, {{name}}{{/if}}{{/foreach}}{{else}}{{#primary_author}}{{name}}{{/primary_author}}{{/has}} ({{date format="YYYY"}}). {{title}}. {{@site.title}}. {{url}}</code></pre>
+					<pre class="gh-citation-text" data-citation-format="apa"><code>{{#has author="count:>1"}}{{#foreach authors}}{{#if @first}}{{name}}{{else if @last}} &amp; {{name}}{{else}}, {{name}}{{/if}}{{/foreach}}{{else}}{{#primary_author}}{{name}}{{/primary_author}}{{/has}} ({{date format="YYYY"}}). {{title}}. {{@site.title}}. {{url absolute="true"}}</code></pre>
 					<button class="gh-citation-copy" type="button" aria-label="Copy APA-style citation">Copy</button>
 				</div>
 
@@ -113,7 +113,7 @@ limitations under the License.
   title  = &#123;&#123;{{title}}&#125;&#125;,
   author = &#123;{{#has author="count:>1"}}{{#foreach authors}}{{#if @first}}{{name}}{{else}} and {{name}}{{/if}}{{/foreach}}{{else}}{{#primary_author}}{{name}}{{/primary_author}}{{/has}}&#125;,
   year   = &#123;{{date format="YYYY"}}&#125;,
-  url    = &#123;{{url}}&#125;
+  url    = &#123;{{url absolute="true"}}&#125;
 &#125;</code></pre>
 					<button class="gh-citation-copy" type="button" aria-label="Copy BibTeX citation">Copy</button>
 				</div>
