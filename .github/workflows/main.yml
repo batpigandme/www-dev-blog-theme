@@ -63,6 +63,11 @@ jobs:
           lfs: false
         timeout-minutes: 10
 
+      # Validate the theme before deploying:
+      - name: 'Validate theme (gscan)'
+        run: npx --yes gscan@6.4.2 --fatal --verbose theme/
+        timeout-minutes: 5
+
       # Deploy theme:
       - name: 'Deploy'
         uses: TryGhost/action-deploy-theme@v1.5.0
