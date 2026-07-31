@@ -32,6 +32,7 @@ limitations under the License.
 	<link rel="stylesheet" href="{{asset "built/screen.css"}}">
 	<link rel="stylesheet" href="{{asset "css/captions.css"}}">
 	<link rel="stylesheet" href="{{asset "css/custom-fonts.css"}}">
+	<link rel="stylesheet" href="{{asset "css/quick-actions.css"}}">
 	<link rel="stylesheet" href="{{asset "css/footnotes.css"}}">
 	<script defer src="{{asset "js/footnotes.js"}}"></script>
 	<style>
@@ -128,7 +129,9 @@ limitations under the License.
 				</nav>
 
 				<div class="gh-head-actions">
-
+					<button class="gh-search-trigger" aria-label="Search this site" data-ghost-search>
+						{{> icons/search}}
+					</button>
 				</div>
 			</div>
 		</header>
@@ -158,6 +161,7 @@ limitations under the License.
 
 	<script src="{{asset "built/main.min.js"}}"></script>
 	<script src="{{asset "js/highlight.min.js"}}"></script>
+	<script src="{{asset "js/highlight-fortran.min.js"}}"></script>
 	<script>hljs.highlightAll();</script>
 
 	{{ghost_foot}}

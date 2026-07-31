@@ -1,0 +1,48 @@
+/**
+* @license Apache-2.0
+*
+* Copyright (c) 2026 The Stdlib Authors.
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*    http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
+
+/*
+* Search trigger button (nav header). The search modal itself is native
+* Ghost core, triggered by the `data-ghost-search` attribute; this only
+* styles the visible button and gives it a real focus indicator, since
+* the built theme has no focus-visible ring convention to inherit.
+*/
+.gh-search-trigger {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 0;
+	background: none;
+	border: 0;
+	color: var(--color-darker-gray);
+	cursor: pointer;
+}
+
+.gh-search-trigger:focus-visible {
+	outline: 2px solid var(--link-color);
+	outline-offset: 2px;
+	border-radius: 2px;
+}
+
+/*
+* Native share-modal trigger (post byline). `#/share` is intercepted by
+* Ghost core; no JS of our own is required.
+*/
+.gh-article-share {
+	margin-left: 0.8rem;
+}
