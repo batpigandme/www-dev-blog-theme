@@ -84,6 +84,44 @@ limitations under the License.
 			{{content}}
 		</div>
 
+		{{!--
+		Cite-this-post block (#18). BibTeX/APA only for now -- no DOI field.
+		A DOI requires Rogue Scholar registration (#16) plus a GitHub Action
+		to write the minted DOI back into the post via Ghost's Admin API;
+		neither exists yet. Once a canonical DOI URL is available on the
+		post, add a `url`-field override (DOI takes precedence over the
+		post's own `{{url}}`) rather than a new field, so both citation
+		formats stay in one place.
+
+		Every literal brace below is HTML-entity-escaped (&#123;/&#125;)
+		to keep it out of Handlebars' way: a literal `{` sitting directly
+		next to a `{{expression}}` forms `{{{`, which Handlebars parses as
+		its own (unrelated) unescaped-output syntax rather than as a
+		literal brace followed by an expression.
+		--}}
+		{{#is "post"}}
+			<section class="gh-citation gh-canvas" aria-labelledby="gh-citation-heading">
+				<h2 id="gh-citation-heading" class="gh-citation-heading">Cite this post</h2>
+
+				<div class="gh-citation-block">
+					<pre class="gh-citation-text" data-citation-format="apa"><code>{{#has author="count:>1"}}{{#foreach authors}}{{#if @first}}{{name}}{{else if @last}} &amp; {{name}}{{else}}, {{name}}{{/if}}{{/foreach}}{{else}}{{#primary_author}}{{name}}{{/primary_author}}{{/has}} ({{date format="YYYY"}}). {{title}}. {{@site.title}}. {{url}}</code></pre>
+					<button class="gh-citation-copy" type="button" aria-label="Copy APA-style citation">Copy</button>
+				</div>
+
+				<div class="gh-citation-block">
+					<pre class="gh-citation-text" data-citation-format="bibtex"><code>@misc&#123;{{slug}}{{date format="YYYY"}},
+  title  = &#123;&#123;{{title}}&#125;&#125;,
+  author = &#123;{{#has author="count:>1"}}{{#foreach authors}}{{#if @first}}{{name}}{{else}} and {{name}}{{/if}}{{/foreach}}{{else}}{{#primary_author}}{{name}}{{/primary_author}}{{/has}}&#125;,
+  year   = &#123;{{date format="YYYY"}}&#125;,
+  url    = &#123;{{url}}&#125;
+&#125;</code></pre>
+					<button class="gh-citation-copy" type="button" aria-label="Copy BibTeX citation">Copy</button>
+				</div>
+
+				<p class="gh-citation-status" role="status" aria-live="polite"></p>
+			</section>
+		{{/is}}
+
 		{{#is "post"}}
 			<footer class="gh-article-footer gh-canvas">
 				<nav class="gh-navigation" aria-label="pagination">
