@@ -1,0 +1,58 @@
+/**
+* @license Apache-2.0
+*
+* Copyright (c) 2026 The Stdlib Authors.
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*    http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
+
+/*
+* Parameterizes the reading measure as `--content-width`, adopting the
+* form current upstream TryGhost/Source uses (`var(--content-width,
+* 720px)`), instead of the `720px` literal hardcoded twice in this
+* theme: once in `.gh-canvas` (post/page grid, Source layer, only
+* readable inside minified built/screen.css) and once in
+* `.gh-wrapper > .gh-section` (index/tag/author feed grid, Journal
+* layer). Those two rules are equal today by coincidence, not by
+* construction, so both are pinned to the same variable here rather
+* than left to drift independently.
+*
+* The value is intentionally left at 720px -- unchanged from today.
+* This file ships the mechanism, not a visual change. Widening the
+* measure is a separate decision: `theme/package.json`'s
+* `config.image_sizes.m.width` is also 720, so an actual width change
+* has to account for existing post images being sized for the old
+* value. See the readability RFC draft for that decision.
+*
+* Must reproduce the *entire* `grid-template-columns` value for
+* `.gh-canvas`, not just the main-column width -- the `minmax(auto,
+* 240px)` wide tracks drive `.kg-width-wide` / `.kg-width-full` full-
+* bleed Koenig cards, and dropping them breaks every wide/full image
+* in every existing post.
+*/
+:root {
+	--content-width: 720px;
+}
+
+.gh-canvas {
+	grid-template-columns:
+		[full-start] minmax(var(--gap), auto)
+		[wide-start] minmax(auto, 240px)
+		[main-start] min(var(--content-width), calc(100% - var(--gap) * 2)) [main-end]
+		minmax(auto, 240px) [wide-end]
+		minmax(var(--gap), auto) [full-end];
+}
+
+.gh-wrapper > .gh-section {
+	max-width: var(--content-width);
+}
