@@ -27,7 +27,9 @@ Concretely:
 
   It also means a convention is only as durable as the person applying it. Any bottom-matter design that relies on authors placing markup correctly inherits this: it will be right on the day of publication and unverifiable afterward. Designs that move a block from post source into the template — or into a Ghost Snippet, which at least lives on the Ghost side of the gap — are worth more here than they would be in a repo-published site.
 
-- **`blog-drafts` is the review surface, which is why it persists.** All editorial review of posts happens in GitHub, on the markdown. That is the reason the repo exists despite not being the source of truth for what is published, and it is why a pipeline that skips Ghost's editor — which would be Mara's preference — is not on the table: **it was pitched and Athan declined it.** Do not propose one.
+- **`blog-drafts` is the review surface, which is why it persists.** All editorial review of posts happens in GitHub, on the markdown. That is the reason the repo exists despite not being the source of truth for what is published, and it is why a pipeline that skips Ghost's editor — which would be Mara's preference — is not on the table. **Do not propose one.**
+
+  Two independent reasons it is settled, worth knowing so the option is not reopened casually. Athan declined the pitch and is content with the WYSIWYG workflow. And the implementation turned out heavier than expected when actually attempted — there is a post-mortem at [stdlib-js/blog-drafts#15](https://github.com/stdlib-js/blog-drafts/issues/15) (closed). Read it before entertaining any "we could just automate this" reflex; the cost is documented, not hypothetical.
 
   **The consequence is a genuine tension in this problem.** The document that gets reviewed and the document that gets published are different artifacts, and every block moved out of post source widens that gap. A CTA that becomes a Ghost Snippet is no longer visible to a GitHub reviewer — the post under review is missing its ending.
 
