@@ -155,9 +155,21 @@ Each has real content beneath it, so these are not stacked hairlines — but a 7
 
 `footnotes.js` appends `<section class="gh-footnotes" role="doc-endnotes">` **inside** `.gh-content`, styled at `margin-top: 4rem`, `padding-top: 2rem`, `border-top`, 1.5rem type, with a `.gh-footnotes-title` h2 at 1.8rem. That is one labelled bottom-matter block already built. Problem 3 reconciles with it rather than replacing it.
 
-If a heading such as `## Sources` directly precedes the absorbed notes, **its text is adopted as the endnotes title** — so an author writing "Sources" gets a section titled "Sources", not an orphaned heading above a "Footnotes" one. This means the section label is **content-owned when an author supplies one and template-owned otherwise**, and the design has to accommodate both states.
+`footnotes.js` will adopt a heading's text as the endnotes title — but **only when that heading is the absorbed notes' immediately-preceding sibling.** In a real stdlib post it is not, and the orphan bug is live.
 
-**But the underlying authoring question is still open.** The WYSIWYG re-authoring step means the draft's heading position and the published card structure can silently diverge, so the adoption behavior handles the common case, not every case.
+**Verified against a post shaped like `the-stakeholder-journey`** (Ghost 6.56, this branch): markdown-it always emits its footnotes section at the **end of the markdown card**, and a real post continues past `## Sources` with the author blurb, the About-stdlib CTA, and `## Acknowledgments`. So the raw notes land *after all of that*, the adoption check sees a `<blockquote>` (the NSF disclaimer) rather than a heading, and the result a reader gets is:
+
+```
+## Sources          ← heading, immediately followed by <hr>. Nothing under it.
+author blurb / About-stdlib CTA / ## Acknowledgments / disclaimer
+## Footnotes        ← the actual notes, under a second, template-supplied heading
+```
+
+Two headings for one idea, one of them empty. Adoption only fires in the degenerate case where the definitions are the last thing in the post — which is exactly what a minimal test post looks like and exactly what a real one does not.
+
+**So this is open, and it belongs to this problem.** The fix is a design decision, not a script tweak: either the references section becomes template-owned (drop `## Sources` from the authoring convention entirely and let the theme title it) or the script learns to find and consume an author heading that is *not* adjacent — which needs a rule for which heading counts, and that rule is a content convention. The WYSIWYG re-authoring step makes it worse, since the draft's heading position and the published card structure can diverge silently.
+
+Whatever ships must also work as plain markup on dev.to and Hashnode, which never run this script — see the cross-posting constraint below.
 
 ### Two more findings that belong here
 
