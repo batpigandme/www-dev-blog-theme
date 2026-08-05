@@ -190,7 +190,13 @@ author blurb / About-stdlib CTA / ## Acknowledgments / disclaimer
 
 Two headings for one idea, one of them empty. Adoption only fires in the degenerate case where the definitions are the last thing in the post — which is exactly what a minimal test post looks like and exactly what a real one does not.
 
-**So this is open, and it belongs to this problem.** The fix is a design decision, not a script tweak. The WYSIWYG re-authoring step makes it worse, since the draft's heading position and the published card structure can diverge silently. Four shapes, in rough order of preference:
+**It is currently being fixed by hand, invisibly, by someone other than the author.** Athan removes `## Sources` while copy-pasting into Ghost during staging. That is an undocumented editorial step, and it has three consequences the design session needs to hold:
+
+- **The live blog may already be free of this bug while the drafts still carry it.** Three of Mara's posts use footnotes; two (`the-stakeholder-journey`, `ai-and-the-invisible-newcomer`) carry a `## Sources` heading in the draft, and one (`do-you-want-contributors`) has footnote definitions with no heading at all. What is actually published for each is unknown from the repo.
+- **There is a publisher role, distinct from the author.** Any convention that says "authors should write X" is really "authors write X and whoever stages it remembers to do Y." A convention that needs a second person to apply it correctly, every time, without a checklist entry, is not a convention.
+- **The workaround is silent.** Nothing records that the removal happened, so the drafts keep accumulating a pattern the publish step keeps undoing.
+
+**So this is open, and it belongs to this problem.** The fix is a design decision, not a script tweak — and one of its jobs is to make the manual step unnecessary rather than to formalise it. Four shapes, in rough order of preference:
 
 1. **Template-owned, fixed label.** Drop `## Sources` from the authoring convention; the theme always titles the section. Simplest and always correct in ordering — but it commits to one word for every post.
 2. **Template-owned, per-post label via an internal tag.** Same mechanism PR #8 already uses for `#sidenotes`: tag a post `#sources` and the theme titles the section "Sources" instead of the default. Internal tags are hidden from readers, surface through `post_class`, and need no template change. Keeps ordering template-owned while letting the label follow the content, at the cost of one more thing for an author to remember.
