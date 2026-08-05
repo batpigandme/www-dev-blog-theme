@@ -200,7 +200,17 @@ Whatever ships must also work as plain markup on dev.to and Hashnode, which neve
 - **Footnotes and citation headings are excluded from heading-font styling.** `built/screen.css` styles `.gh-content > [id]` with a **direct-child** selector. `<h2 id="footnote-label">` is nested inside `.gh-footnotes`, and `<h2 id="gh-citation-heading">` is not in `.gh-content` at all. Any heading-level type decision has to reach these two explicitly or they will silently diverge from every other heading in the post.
 - **Cross-posting constraint.** Posts cross-post to dev.to and Hashnode, which never execute this theme's JS. Whatever section-heading solution ships has to work as plain HTML/markdown in the source content — it cannot rely on client-side JS to inject headings that would then be missing on the cross-posted copies.
 
-**Also worth considering, adjacent to but not strictly visual:** the repeated "about stdlib" paragraph and star/support CTA is currently hand-copy-pasted into every post's source. It is a candidate for a Ghost Snippet instead — worth flagging to whoever scopes the authoring-workflow side, even though it does not change how the block should look.
+### How these blocks actually get into posts
+
+The workflow is: author the post as markdown in `blog-drafts` on GitHub, then copy-paste it by hand into the Ghost WYSIWYG editor. Nothing transcludes, nothing templates. Every bottom-matter block is pasted per post, which produces three different situations — measured across all 21 posts in `blog-drafts`:
+
+**Author bio — a hook already exists and the theme ignores it.** Twelve posts across four authors wrap the bio in `<p class="dev-theme-author-blurb">`, and **that class is styled nowhere in the theme.** It renders as a plain italic paragraph. So the convention is already established and reliably applied; it has simply never been picked up. Any design here can key off markup authors are already writing rather than asking them to adopt something new.
+
+**About-stdlib CTA — genuinely drifted, three variants in circulation.** Eighteen posts carry it. Nine match `blog-drafts/common/cta.md` exactly. Six use "consider **financially** supporting the project". Three are collapsed to a single line — "give us a star 🌟!" — dropping the Open Collective link and the support sentence entirely. `common/cta.md` exists as a canonical source but nothing enforces it, so the file records an intention rather than the state of the blog.
+
+**NSF acknowledgment — consistent, but only by hand, and only on some posts.** Six of 21 posts carry it (five of Mara's, one of Athan's). The disclaimer wording is **byte-identical** across all six and the award number matches throughout. That consistency is real and worth preserving — but it is the product of careful copy-paste, not of any mechanism, and it is exactly the block where drift would be a compliance problem rather than an aesthetic one.
+
+**Three different problems, so probably not one mechanism.** The bio is per-author and already has a class to hang off. The CTA is identical for every post and has already drifted — the strongest candidate for a Ghost Snippet or a theme partial. The NSF block is conditional (funding-dependent), carries required language, and applies to under a third of posts, so it wants whichever option makes the text hardest to alter accidentally. Whatever ships must also survive as plain markup on dev.to and Hashnode, which run none of this theme's code.
 
 **Anatomy:** primarily `post.hbs` structure plus a pass through `theme/assets/css/` for section-heading treatment. Likely needs a content-authoring convention decided alongside the visual one.
 
