@@ -21,6 +21,8 @@ Concretely:
 - Anything that looks right in a static mockup **still has to be verified against a real Ghost render**. Ghost's helpers inject classes and wrap content in ways a naive mock misses — this bit us directly: `{{url}}` rendering relative instead of absolute only showed up against a live page, not in the artifact mockup.
 - Authoring is **WYSIWYG-only** now. The markdown in `blog-drafts` does not survive its trip into Ghost verbatim, since a human recreates it as cards. Any direction that depends on hand-written conventions in post source — where a heading sits, how content is broken into cards — has to survive that manual re-authoring step.
 
+**`blog-drafts/docs/artwork/README.md` is not a source for this work.** That document is the editorial art direction for **figures, illustrations, and slides** — its palette, materials, and lighting guidance govern the images *inside* posts, not the theme's own typography or chrome. The only thing to take from it here is factual: feature images are authored at a default 2:1, which is a constraint the header has to accommodate. Do not derive theme colors from it.
+
 **Carried-over constraint from `stdlib.io` (2026-07-31):** the main site and its docs are, per Athan, due for their own revamp and are not a design anchor to emulate — inspected directly, they are a plain system-ui stack, Bootstrap-era layout, no custom typography. But the docs are *intentionally* kept visually coherent with the blog today, so a blog direction that drifts too far risks breaking that family resemblance before the main site gets its own pass. Not a blocker; flag it to Athan if a direction would read as visually disconnected.
 
 ---
