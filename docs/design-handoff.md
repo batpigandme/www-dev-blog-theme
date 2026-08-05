@@ -167,7 +167,14 @@ author blurb / About-stdlib CTA / ## Acknowledgments / disclaimer
 
 Two headings for one idea, one of them empty. Adoption only fires in the degenerate case where the definitions are the last thing in the post — which is exactly what a minimal test post looks like and exactly what a real one does not.
 
-**So this is open, and it belongs to this problem.** The fix is a design decision, not a script tweak: either the references section becomes template-owned (drop `## Sources` from the authoring convention entirely and let the theme title it) or the script learns to find and consume an author heading that is *not* adjacent — which needs a rule for which heading counts, and that rule is a content convention. The WYSIWYG re-authoring step makes it worse, since the draft's heading position and the published card structure can diverge silently.
+**So this is open, and it belongs to this problem.** The fix is a design decision, not a script tweak. The WYSIWYG re-authoring step makes it worse, since the draft's heading position and the published card structure can diverge silently. Four shapes, in rough order of preference:
+
+1. **Template-owned, fixed label.** Drop `## Sources` from the authoring convention; the theme always titles the section. Simplest and always correct in ordering — but it commits to one word for every post.
+2. **Template-owned, per-post label via an internal tag.** Same mechanism PR #8 already uses for `#sidenotes`: tag a post `#sources` and the theme titles the section "Sources" instead of the default. Internal tags are hidden from readers, surface through `post_class`, and need no template change. Keeps ordering template-owned while letting the label follow the content, at the cost of one more thing for an author to remember.
+3. **Script consumes a non-adjacent author heading.** Needs a rule for which heading counts, and that rule is itself a content convention — the fragile option, and it still fails on cross-posted copies.
+4. **Leave it content-owned and fix the ordering by convention** — authors put `## Sources` last. Fights the way people actually write, and the bio and acknowledgments genuinely belong after the references.
+
+**The label question is real regardless of mechanism.** stdlib's notes are mixed: in `the-stakeholder-journey`, `[^1]` is a pure citation, `[^2]` opens with commentary before its references, `[^3]` carries a gloss alongside a DOI. "Sources" overstates the commentary ones and "Footnotes" undersells the citations. Something like "Notes and references" may be truer than either — worth deciding deliberately rather than inheriting whichever word the mechanism makes easiest.
 
 Whatever ships must also work as plain markup on dev.to and Hashnode, which never run this script — see the cross-posting constraint below.
 
@@ -237,6 +244,36 @@ Three findings fall straight out of that table, and together they are the substa
 - **h1 → h2 is a 2.6× cliff** (7.4 → 2.8rem), while h2 → h6 spans only 2.8 → 1.8rem in five steps of 0.2–0.4rem. The subheads are nearly indistinguishable from one another, and **h6 is exactly body size**. There is no usable hierarchy below h2.
 - **The excerpt is the same size as h2**, and its line-height was *tightened* to 1.35 while its size went *up* from 2.1rem.
 - Breakpoints are coarse: the title jumps 7.4rem → 4.2rem at 767px with nothing between, so the entire **768–991px band renders at the full 7.4rem**.
+
+### Measured line lengths — the readability question, in characters
+
+Computed on the live render against the element's own text and font, identical at 1280, 1440, and 1800px:
+
+| Element | Width | Size | **Chars/line** | Read |
+|---|---|---|---|---|
+| `.gh-article-title` | 1200px | 74px | **35** | fine — it's a headline |
+| `.gh-article-excerpt` | 920px | 28px | **71** | inside the comfortable range |
+| **`.gh-content > p`** | 720px | 18px | **85** | **too wide** |
+| **`figcaption` (wide figure)** | 1200px | 14px | **184** | **far too wide** |
+| `.gh-sidenote` | 240px | 13px | 38 | workable for glosses, tight for citations |
+
+Two things this settles.
+
+**The body measure is 85 characters, not ~72.** The readability conversation has been aimed at the measure, correctly, but the gap is larger than the framing implied. Reaching 72 means roughly **610px** at the current 1.8rem, or holding 720px and raising the type size. The first option collides with `config.image_sizes.m.width = 720`; the second does not, and is the cheaper lever. Either way the target should be stated in characters and the pixel value derived, not the other way round.
+
+**The excerpt is not the problem.** It carries `max-width: 920px`, so it does not track the viewport — it is 920px and 71 characters at every width, including 1800. Worth stating plainly, because "the header goes wide" reads as though the excerpt sprawls, and it doesn't.
+
+### A fourth item: caption width
+
+Not one of the three problems, but it is the worst line length on the page and nothing in the roadmap has flagged it. A caption under a `.kg-width-wide` figure fills the full 1200px track at 14px — **184 characters**, more than twice the body — and since captions were left-aligned it runs as one long flush-left line. stdlib's captions are descriptive and long, so this is the common case, not an edge one.
+
+**This is cheap to fix.** `theme/assets/css/captions.css` already exists and is already registered at `default.hbs:33`, so it needs no new file and no cascade work. The decision is what to constrain to, and that is a design call:
+
+- cap at the body measure and align to the figure's left edge — keeps the caption tied to its figure;
+- cap at the body measure and centre under the figure — matches the wide/main shared centre line;
+- cap somewhere between, treating the caption as its own register rather than body copy.
+
+Whichever wins should also cover `.kg-width-full` (which adds `padding: 0 1.6rem` and is wider still) and the feature-image caption in the article header.
 
 **Two free hooks, no rebuild required:** `.gh-content > p, ul, ol, dl, blockquote` read `var(--content-font-size, 1.8rem)` and `var(--content-letter-spacing, 0)`, and neither variable is ever defined. Setting them in a new stylesheet changes body typography directly — **but** a later rule inside `@media (max-width: 767px)` hardcodes 1.7rem, so `--content-font-size` is inert below 768px. Any spec leaning on it must say what happens on mobile.
 
