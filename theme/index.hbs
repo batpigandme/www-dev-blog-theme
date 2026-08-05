@@ -94,6 +94,8 @@ limitations under the License.
 					</div>
 				</section>
 
+				{{!-- `limit="all"` is not supported by the `get` helper; 100 is its
+				maximum. A site with more than 100 featured posts truncates here. --}}
 				{{#get "posts" filter="featured:true" limit="100" as |featured|}}
 					{{#if featured}}
 						<section class="gh-section">
@@ -108,6 +110,8 @@ limitations under the License.
 					{{/if}}
 				{{/get}}
 
+				{{!-- Same 100-item `get` ceiling as above; a site with more than 100
+				tags truncates here. --}}
 				{{#get "tags" include="count.posts" limit="100" as |topic|}}
 					<section class="gh-section">
 						<h3 class="gh-section-title">Topics</h3>

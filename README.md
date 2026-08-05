@@ -30,7 +30,7 @@ The theme repairs and upgrades footnotes at render time via [`theme/assets/js/fo
 
 ### Footnotes
 
-Ghost emits inconsistent (and often broken) footnote markup depending on how content enters the editor. On each post, the script detects and normalizes all of the following into a single endnotes section with sequential numbering, working bidirectional links, and [DPUB-ARIA][dpub-aria] roles (`doc-noteref`, `doc-endnotes`, `doc-endnote`, `doc-backlink`):
+Ghost emits inconsistent (and often broken) footnote markup depending on how content enters the editor. On each post, the script detects and normalizes all of the following into a single endnotes section with sequential numbering, working bidirectional links, and [DPUB-ARIA][dpub-aria] roles (`doc-noteref`, `doc-endnotes`, `doc-backlink`):
 
 -   content pasted into the Lexical editor, which strips footnote `id` and fragment `href` attributes;
 -   Markdown cards, including posts split across multiple cards (which otherwise produce duplicate `id`s and per-card renumbering);
@@ -79,6 +79,32 @@ On wide viewports, the aside floats in the right margin; on narrow viewports (or
 
 **Known open item**: whether footnotes elsewhere in the post still resolve correctly with an aside's HTML card sitting between paste-derived paragraphs — not yet verified; see the PR's test plan.
 
+**On pages**: endnotes and asides work on Ghost pages exactly as they do on posts. Margin *sidenotes* do not — the `#sidenotes` opt-in is read from `post_class`'s `tag-hash-sidenotes`, and pages don't carry tags — so a page's footnotes stay endnotes-only regardless.
+
+## Reading measure
+
+The post/page content column is parameterized as `--content-width` in [`theme/assets/css/measure.css`][measure-css], which pins both the `.gh-canvas` grid (posts and pages) and `.gh-wrapper > .gh-section` (index, tag, and author feeds) to the same variable. Those two were equal at 720px by coincidence rather than by construction; this keeps them from drifting apart.
+
+The value is deliberately unchanged at 720px — the file ships the mechanism, not a visual change. Note that `config.image_sizes.m.width` in [`theme/package.json`](./theme/package.json) is also 720, so changing the measure means existing post images are sized for the old value and will upscale.
+
+## Citation block
+
+Posts (not pages) render a "Cite this post" section with an APA-style citation and a BibTeX entry, built entirely from data already on the post context — title, authors, date, canonical URL, site title. No post metadata, external service, or DOI is involved.
+
+The citations are static, selectable text; there are deliberately no copy-to-clipboard controls. A DOI, once one exists, becomes its own additive `doi` field alongside `url` rather than replacing it — see the note at the top of the block in [`theme/post.hbs`](./theme/post.hbs).
+
+## Search, sharing, and syntax highlighting
+
+-   **Search** uses Ghost's native modal. The theme supplies only a trigger button carrying `data-ghost-search`; core does the rest. It is also reachable with <kbd>⌘</kbd>+<kbd>K</kbd>.
+-   **Sharing** uses Ghost's native share modal via a `#/share` link in the post byline, intercepted by core. No theme JavaScript is involved.
+-   **Fortran** highlighting is vendored as a language module alongside the theme's existing highlight.js build, registered before `highlightAll()` runs. Other languages are unaffected.
+
+## Fonts
+
+Type is set through Ghost's native custom-fonts setting, applied by [`theme/assets/css/custom-fonts.css`][custom-fonts-css], which maps `--gh-font-heading` and `--gh-font-body` onto the theme's headings and body. With no font chosen in Ghost Admin, the fallbacks keep the theme's shipped Inter stack unchanged.
+
+The theme previously exposed its own `title_font` / `body_font` selects. They were removed: they outranked the native mechanism on specificity, and their "Elegant serif" option resolved to a font the theme does not ship.
+
 ## License
 
 See [LICENSE][stdlib-license].
@@ -94,6 +120,10 @@ Copyright (c) 2022. The Stdlib [Authors][stdlib-authors].
 [footnotes-js]: https://github.com/stdlib-js/www-dev-blog-theme/blob/main/theme/assets/js/footnotes.js
 
 [footnotes-css]: https://github.com/stdlib-js/www-dev-blog-theme/blob/main/theme/assets/css/footnotes.css
+
+[measure-css]: https://github.com/stdlib-js/www-dev-blog-theme/blob/main/theme/assets/css/measure.css
+
+[custom-fonts-css]: https://github.com/stdlib-js/www-dev-blog-theme/blob/main/theme/assets/css/custom-fonts.css
 
 [dpub-aria]: https://www.w3.org/TR/dpub-aria-1.0/
 
