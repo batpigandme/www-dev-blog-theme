@@ -40,9 +40,19 @@
 }
 
 /*
-* Native share-modal trigger (post byline). `#/share` is intercepted by
-* Ghost core; no JS of our own is required.
+* Native share-modal trigger, rendered inline inside `.gh-article-meta`
+* so it inherits the byline's 1.2rem uppercase secondary-text treatment
+* and matches the author links beside it. It must stay nested there --
+* as a direct child of the `.gh-canvas` header it would be placed on a
+* grid row of its own; see the note in `post.hbs`.
+*
+* `#/share` is intercepted by Ghost core; no JS of our own is required.
 */
 .gh-article-share {
 	margin-left: 0.8rem;
+}
+
+.gh-article-share:focus-visible {
+	outline: 2px solid var(--link-color);
+	outline-offset: 2px;
 }

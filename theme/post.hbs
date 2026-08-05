@@ -51,8 +51,16 @@ limitations under the License.
 					{{/if}}
 					—
 					<time datetime="{{date format="YYYY-MM-DD"}}">{{date}}</time>
+					{{!--
+					Must stay INSIDE `.gh-article-meta`. `.gh-canvas` is a
+					grid and `.gh-canvas > *` places every direct child of
+					the header in its own row, so a share link that is a
+					sibling of the byline gets blockified onto a row of its
+					own between the byline and the title, at body type
+					rather than the byline's.
+					--}}
+					<a class="gh-article-share" href="#/share">Share</a>
 				</span>
-				<a class="gh-article-share" href="#/share">Share</a>
 			{{/is}}
 
 			<h1 class="gh-article-title">{{title}}</h1>
