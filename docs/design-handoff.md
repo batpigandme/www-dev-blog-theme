@@ -70,6 +70,23 @@ Note the body's buffers: 280 − 40 = 240 on the left, 1240 − 1000 = 240 on th
 
 Mara's read on *why* it reads fine there: Journal's demo images are abstract, decorative splash graphics — free to run huge because they carry no information. stdlib's feature images (the bowtie diagram, for instance) are often actually informative content, so the same move does not have the same justification and may not translate. **That is the crux of the A/B choice, not a taste preference.**
 
+### The misalignment is almost never visible in one screenful — including here
+
+Journal gets away with the width cliff partly because its feature images are enormous: you cannot see the excerpt and the body at the same time without deliberately zooming out. Measured on this branch at 1440×900, the same is true of stdlib at its own authored aspect ratio:
+
+| Feature image | Rendered height | Body copy starts at | Both visible at once? |
+|---|---|---|---|
+| **2:1** (the art direction's default) | 600px | y = 1129 | **No** — 229px below the fold |
+| 3.5:1 (short banner) | 343px | y = 872 | Yes, barely — 28px showing |
+
+The crossover is around **3.2:1**. Anything squarer than that pushes the body below the fold, so a reader never holds the wide header and the narrow body in one view.
+
+**This matters because it disqualifies the most intuitive argument for decoupling.** "The cliff looks jarring" is not the case to make — in practice it is rarely seen. Three arguments do survive, and the design session should choose between them explicitly:
+
+1. **Informative images may not want hero treatment.** The bowtie diagram is content to be read, not a splash to be felt. Hero scale suits decoration; a diagram may be better served at a size where its labels are legible, which is a different question from how wide the title is.
+2. **The inconsistency is felt across posts, not within one.** A reader moving from a post with a feature image to one without sees the title and byline begin at a different horizontal position each time — 120px versus 360px at 1440. That is a memory effect, not a co-visibility one, and it is the strongest argument against the coupling.
+3. **The excerpt and body are set at different measures** (71 versus 85 characters) and read in sequence. Whether that shift is a deliberate change of register or an accident of the grid is a real call.
+
 **Two candidate directions**, not mutually exclusive with refinement:
 
 - **A — Keep the coupling.** The header goes wide whenever there is a feature image, as it does today and as Journal does. If this wins, the open question is whether the typography and spacing still feel right at that width, and whether stdlib's more-often-informative images read as well at hero scale as Journal's decorative ones.
