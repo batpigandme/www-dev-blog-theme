@@ -52,6 +52,18 @@ Ghost's `post_class` adds `no-image` whenever a post has no feature image. So ev
 - The **excerpt is on the wide track too**, exactly like the title — it is a direct child of the header. It carries `max-width: 920px`, so it stops short of the full 1200px band, but it is *placed* wide. The narrower element is the separate post body (`.gh-content`), which sits outside the header.
 - The body is **centered** under the wide header, not left-flush. `main-start`/`main-end` sit with equal buffer from `wide-start`/`wide-end`; the two tracks share a center line. A mockup that left-aligns both edges misrepresents the behavior.
 
+Measured directly against a local Ghost 6.56 render of this branch, one post toggled between the two states at a **1280px viewport**:
+
+| Element | With feature image | Without |
+|---|---|---|
+| `.gh-article-title` | x 40–1240 (**1200px**, wide track) | x 280–1000 (**720px**, main track) |
+| `.gh-article-image` | x 40–1240 (1200px) | — |
+| `.gh-article-excerpt` | x 40–**960** — starts at `wide-start` but stops at its own `max-width: 920px` | x 280–1000 |
+| `.gh-content` body copy | x 280–1000 (720px) | x 280–1000 (720px) |
+| `post_class` | `gh-article post` | `gh-article post no-image` |
+
+Note the body's buffers: 280 − 40 = 240 on the left, 1240 − 1000 = 240 on the right. **Exactly equal** — the wide and main tracks share a center line, and the body does not shift when the header widens. Only the header moves.
+
 **Confirmed against Journal's own upstream demo (2026-07-31)**, since Athan built this theme starting from Journal and it is a taste anchor for him: `journal.ghost.io/welcome/` shows exactly this coupling, verified by direct DOM measurement at 1280px — title, byline, and feature image all render at the wide track (1200px), body copy drops to 720px immediately after. The visual cliff between header and body is real and pronounced even on Journal's own reference site; it is not something introduced by this fork.
 
 Mara's read on *why* it reads fine there: Journal's demo images are abstract, decorative splash graphics — free to run huge because they carry no information. stdlib's feature images (the bowtie diagram, for instance) are often actually informative content, so the same move does not have the same justification and may not translate. **That is the crux of the A/B choice, not a taste preference.**
