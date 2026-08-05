@@ -88,10 +88,16 @@ limitations under the License.
 		Cite-this-post block (#18). BibTeX/APA only for now -- no DOI field.
 		A DOI requires Rogue Scholar registration (#16) plus a GitHub Action
 		to write the minted DOI back into the post via Ghost's Admin API;
-		neither exists yet. Once a canonical DOI URL is available on the
-		post, add a `url`-field override (DOI takes precedence over the
-		post's own `{{url}}`) rather than a new field, so both citation
-		formats stay in one place.
+		neither exists yet. Once a DOI is available, it slots in as its own
+		additive `doi` field alongside `url` -- a DOI identifies the work,
+		a URL locates it, and BibTeX carries both. It must never replace or
+		override the post's own `{{url}}`.
+
+		Still to decide before that lands: whether the minted DOI is stored
+		in the post's `canonical_url` (what the front-matter.de workflows
+		use) or in a separate custom field, since that determines whether
+		the `url` line needs a conditional or can simply read
+		`canonical_url` when set.
 
 		Every literal brace below is HTML-entity-escaped (&#123;/&#125;)
 		to keep it out of Handlebars' way: a literal `{` sitting directly
@@ -105,7 +111,6 @@ limitations under the License.
 
 				<div class="gh-citation-block">
 					<pre class="gh-citation-text" data-citation-format="apa"><code>{{#has author="count:>1"}}{{#foreach authors}}{{#if @first}}{{name}}{{else if @last}} &amp; {{name}}{{else}}, {{name}}{{/if}}{{/foreach}}{{else}}{{#primary_author}}{{name}}{{/primary_author}}{{/has}} ({{date format="YYYY"}}). {{title}}. {{@site.title}}. {{url absolute="true"}}</code></pre>
-					<button class="gh-citation-copy" type="button" aria-label="Copy APA-style citation">Copy</button>
 				</div>
 
 				<div class="gh-citation-block">
@@ -115,10 +120,7 @@ limitations under the License.
   year   = &#123;{{date format="YYYY"}}&#125;,
   url    = &#123;{{url absolute="true"}}&#125;
 &#125;</code></pre>
-					<button class="gh-citation-copy" type="button" aria-label="Copy BibTeX citation">Copy</button>
 				</div>
-
-				<p class="gh-citation-status" role="status" aria-live="polite"></p>
 			</section>
 		{{/is}}
 
