@@ -1,0 +1,29 @@
+/**
+* Problem 1 — header width coupling (Direction B: decouple the feature
+* image from title/byline/excerpt).
+*
+* Overrides the one selector in built/screen.css responsible for coupling
+* header-text width to feature-image presence:
+*
+*   .gh-article:not(.no-image) .gh-article-header > * {
+*     grid-column: wide-start / wide-end;
+*   }
+*
+* That rule has specificity (0,3,0): three class-level selectors --
+* .gh-article, :not(.no-image) (a :not() takes the specificity of its
+* argument), and .gh-article-header. The rule below repeats all three and
+* adds a fourth, :not(.gh-article-image), giving it (0,4,0) -- it wins on
+* specificity alone, independent of load order (it also loads after
+* built/screen.css, so either would be sufficient on its own).
+*
+* .gh-article-image keeps its own separate rule in built/screen.css
+* (untouched here) that always places it at wide-start/wide-end -- the
+* image still goes wide; only the text stops following it.
+*
+* No-image posts are unaffected: their header children already resolve to
+* main-start/main-end via the baseline `.gh-canvas > *` rule, which this
+* file never touches.
+*/
+.gh-article:not(.no-image) .gh-article-header > *:not(.gh-article-image) {
+	grid-column: main-start / main-end;
+}
