@@ -207,6 +207,8 @@ The last screenful of every post currently draws three horizontal rules, and the
 
 Each has real content beneath it, so these are not stacked hairlines — but a 720px rule followed by two full-bleed ones makes the narrower one look like the mistake. The full-bleed footer rule is pre-existing upstream behavior; adding the citation block as a second `gh-canvas` sibling doubled it. **Reconciling these three is the concrete core of this problem.**
 
+**Distill's answer, for reference:** every horizontal rule is full-bleed — `d-article hr { grid-column: screen }` — and section separation is carried by the headings themselves (`d-article h2` has a `border-bottom` and `padding-bottom: 1rem`), not by rules between blocks. One rule width everywhere, and the labelling work done by type. That is one coherent resolution of the three-widths problem; it is not the only one, but it shows the two levers are rule width and heading treatment together, not rule width alone.
+
 ### The endnotes block already has a treatment to reconcile with
 
 `footnotes.js` appends `<section class="gh-footnotes" role="doc-endnotes">` **inside** `.gh-content`, styled at `margin-top: 4rem`, `padding-top: 2rem`, `border-top`, 1.5rem type, with a `.gh-footnotes-title` h2 at 1.8rem. That is one labelled bottom-matter block already built. Problem 3 reconciles with it rather than replacing it.
@@ -327,7 +329,7 @@ Every rule above lives in **our** `built/screen.css`. None of it comes from Ghos
 
 Three findings fall straight out of that table, and together they are the substance of the readability complaint:
 
-- **h1 → h2 is a 2.6× cliff** (7.4 → 2.8rem), while h2 → h6 spans only 2.8 → 1.8rem in five steps of 0.2–0.4rem. The subheads are nearly indistinguishable from one another, and **h6 is exactly body size**. There is no usable hierarchy below h2.
+- **h1 → h2 is a 2.6× cliff** (7.4 → 2.8rem), while h2 → h6 spans only 2.8 → 1.8rem in five steps of 0.2–0.4rem. The subheads are nearly indistinguishable from one another, and **h6 is exactly body size**. There is no usable hierarchy below h2. For contrast, Distill's scale runs h1 50px → h2 36px → h3 20px → h4 14px uppercase over ~17px body — **a 1.4× h1→h2 step**, and it separates h4 by case rather than by size once the sizes get close.
 - **The excerpt is the same size as h2**, and its line-height was *tightened* to 1.35 while its size went *up* from 2.1rem.
 - Breakpoints are coarse: the title jumps 7.4rem → 4.2rem at 767px with nothing between, so the entire **768–991px band renders at the full 7.4rem**.
 
@@ -407,6 +409,27 @@ Margin sidenotes are **not** grid items — `.gh-content.gh-canvas` gets `positi
 
 **The width problem this bounds but does not solve:** 240px is genuinely tight for these drafts' notes — `the-stakeholder-journey`'s third footnote is about 380 characters, roughly 18–20 lines in that column. The honest fix may be editorial rather than structural: short marginal glosses in the margin, full citations in the endnotes. Proposing that authoring convention is a design contribution.
 
+### Calibration against the reference lineage — the gap is the threshold, not the width
+
+Measured from each site's own stylesheet (both Apache-2.0; `distillpub/template` and Quarto's Distill-derived `page-columns`):
+
+| | margin width | engages at |
+|---|---|---|
+| distill.pub | 152px @ 12px | **768px** right, 1000px left |
+| dataand.me (Quarto) | **200px** | **992px** |
+| **this theme** | **240px** @ 13px | **1120px** |
+
+**This theme has the widest margin of the three and the latest threshold.** That inverts the framing the readability complaint has been carrying. The notes are not cramped relative to the layouts being emulated — they simply require an unusually wide window to appear at all.
+
+**The cause is the measure, not the margin.** Both references let the text column shrink: Quarto's is `minmax(500px, calc(750px - 4rem))`, which gives back ~130px under pressure. This theme's is `min(720px, calc(100% - var(--gap) * 2))`, which holds 720px rigidly until the viewport cannot fit it at all — so margins cannot reach usable width until 720px plus two gutters fits, which is 1120px.
+
+**So an earlier sidenote threshold is bought with measure, not with viewport, and that is a different trade from widening the gutter.** Widening costs a re-render of every published post (see below). Lowering the threshold costs reading measure at mid-range widths, and nothing else. The design session should treat these as two separate decisions:
+
+1. **How wide should the margin be?** — 240px today, against 152 and 200 in the references. Migration cost applies.
+2. **At what viewport should it appear?** — 1120px today, against 768 and 992. Costs measure elasticity, no migration.
+
+Nothing here argues for narrowing. It argues that the second question is the one the original complaint was actually about.
+
 **Correction (2026-08-06): widening the gutter *is* available, contrary to what this section previously said.** It cited the appendix's 1872px figure, but that figure is for a different layout — preserving the 1200px wide band and adding note columns *outside* it. Simply raising the `minmax(auto, 240px)` cap grows the wide band instead. Measured against the real track list:
 
 | cap | 1280 | 1440 | 1600 | wide band |
@@ -463,3 +486,7 @@ It would also force re-declaring seven load-bearing rules by hand (`.gh-canvas >
 - Sidenote clones are appended as children of `.gh-content`, so any `grid-row`-counting logic must skip `.gh-sidenote` nodes.
 
 **Thresholds are two, not one.** Gutters are 0 below ~792 and only reach usable prose width around 1120–1200, so a TOC can engage at 992 (where the left gutter first reaches ~100px) while sidenotes stay fixed at 1120. Each gets the width it actually needs; that is a feature, not a compromise.
+
+**Distill does exactly this, and asymmetrically.** From its stylesheet: the right margin (`gutter`) separates from the text column at **768px**, while the left margin (`kicker`) does not appear until **1000px** — below that, `kicker-end` sits on `text-start` and the zone has no width. Two thresholds, and the *right* margin is the one worth having early. That matches the allocation above, where sidenotes hold the right and a TOC would take the left.
+
+**And its reflow is the line names collapsing, not element rules.** Below 768px, `page-start`, `kicker-start`, `text-start`, `gutter-start`, and `middle-start` all resolve to the same grid line, as do their `-end` counterparts. `grid-column: gutter` therefore *is* `grid-column: text` at mobile, so an `<aside>` becomes full-width in flow with no media query of its own, no repositioning, and no JS. Worth knowing as a pattern even though this theme's sidenotes are JS-positioned clones for a separate reason (escaping grid-row containment).
