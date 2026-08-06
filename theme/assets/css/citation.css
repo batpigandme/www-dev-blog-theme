@@ -84,13 +84,20 @@
 }
 
 /*
-* BibTeX stays monospace but drops a register from body copy: smaller,
-* secondary-text color. Same specificity argument against the
-* built/screen.css `code` rule as above.
+* BibTeX stays monospace and drops a register from body copy: smaller,
+* de-emphasized via `--color-dark-gray` rather than `--color-secondary-text`
+* (`#757575`), which measured a thin 4.61:1 against white -- barely above
+* the 4.5:1 AA floor for normal-size text, and not what you want to be
+* this close to the line. `--color-dark-gray` (`#444`) clears AA with real
+* margin (9.74:1) while staying visibly lighter than `--color-primary-text`,
+* which -- via a second `:root` rule further down in built/screen.css --
+* actually resolves to pure `#000`, not the `#333` a single grep suggests.
+* Same specificity argument against the built/screen.css `code` rule as
+* the APA rule above.
 */
 .gh-citation-text[data-citation-format="bibtex"] code {
 	font-size: 1.3rem;
-	color: var(--color-secondary-text, #757575);
+	color: var(--color-dark-gray);
 }
 
 /*
