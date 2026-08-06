@@ -17,7 +17,7 @@ Concretely:
 - Every direction has to be expressible as **Handlebars template changes** plus **additive CSS/JS files**. No arbitrary markup, no build step of our own.
 - **`theme/assets/built/screen.css` is minified and cannot be regenerated.** The build needs a `shared` package that is not vendored, and no script rebuilds it. Never edit it. New rules ship as new files in `theme/assets/css/`, registered in `theme/default.hbs` after `built/screen.css`.
 
-  **"Never edit it" is not "cannot change it."** This distinction has been misread once already, so it is worth stating flatly: that file is *ours*, it is served as-is, and any rule in it can be overridden wholesale by a later file at equal specificity. The constraint is on the editing method, not on the outcome. See "The grid is the theme's" below.
+  **"Never edit it" is not "cannot change it."** The distinction is easy to lose and expensive to lose: that file is *ours*, it is served as-is, and any rule in it can be overridden wholesale by a later file at equal specificity. The constraint is on the editing method, not on the outcome. Treat no layout value in it as fixed until you have checked whether a later file already overrides it — see "The grid is the theme's" below.
 - **`theme/assets/css/screen.css` is the authored source of record but is not served.** It genuinely is the last of eighteen sources compiled into the built file, so it is the only readable map of what this theme customized on top of Ghost's Source and Journal layers — but nothing rebuilds it, so editing it is a silent no-op. Read it; never expect a change there to ship.
 - Content structure is bounded by **Ghost's own primitives**: the Koenig card system (`.kg-width-wide` / `.kg-width-full` figures, separate cards that cannot share inline markdown — which is why footnote cross-links needed a JS fix), the `post_class` helper's conditional classes (`no-image` is the root cause of Problem 1), and the `.gh-canvas` named-grid-line system.
 - Anything that looks right in a static mockup **still has to be verified against a real Ghost render**. Ghost's helpers inject classes and wrap content in ways a naive mock misses — this bit us directly: `{{url}}` rendering relative instead of absolute only showed up against a live page, not in the artifact mockup.
@@ -71,7 +71,7 @@ That is a substantially heavier mechanism than this theme needs, and porting it 
 
 That is a live option for Problem 2 that has not been raised: metadata as *front* matter rather than bottom matter. It also bears on the open DOI-storage question, since displaying a DOI in the header rather than only inside the BibTeX entry changes how much the `canonical_url`-versus-custom-field decision actually matters.
 
-*Provenance note: distill.pub and transformer-circuits.pub are unreachable from the environment these corrections were made in, so any measured figures attributed to them come from Mara's own devtools inspection, not from a re-measurement.*
+*Data provenance: figures attributed to distill.pub and Quarto are read from their stylesheets (both open-licensed — `distillpub/template`, `quarto-cli`). Figures attributed to transformer-circuits.pub come from devtools inspection at a single viewport and are the softest numbers in this document; re-measure before relying on them.*
 
 ---
 
@@ -427,22 +427,39 @@ Quarto figures read from source (`_bootstrap-variables.scss`, `_bootstrap-mixins
 
 **The track ordering differs too, and it follows from the same choice.** Quarto's outer gutters are `5fr`, so they absorb slack only *after* the content and margin tracks reach their maxima — content columns are served first, edges take the remainder. In `.gh-canvas` the capped 240px tracks fill first and the outer `minmax(var(--gap), auto)` tracks take what is left. Ghost's arrangement is not wrong, but it means the margin can only ever be paid for out of surplus.
 
-**So an earlier sidenote threshold is bought with measure, not with viewport, and that is a different trade from widening the gutter.** Widening costs a re-render of every published post (see below). Lowering the threshold costs reading measure at mid-range widths, and nothing else. The design session should treat these as two separate decisions:
+### The measure and the margin are one decision, and a free combination exists
 
-1. **How wide should the margin be?** — 240px today, against 152 and 200 in the references. Migration cost applies.
-2. **At what viewport should it appear?** — 1120px today, against 768 and 992. Costs measure elasticity, no migration.
+**The stated complaint is that margin asides reflow into the body at too wide a viewport** — they engage only at 1120px. The measure is what determines that, because a narrower text column hands its space straight to the gutters. So the two are not independent knobs.
 
-Nothing here argues for narrowing. It argues that the second question is the one the original complaint was actually about.
+Measured against the real track list, holding the 240px cap:
 
-**Correction (2026-08-06): widening the gutter *is* available, contrary to what this section previously said.** It cited the appendix's 1872px figure, but that figure is for a different layout — preserving the 1200px wide band and adding note columns *outside* it. Simply raising the `minmax(auto, 240px)` cap grows the wide band instead. Measured against the real track list:
+| measure | approx. chars | sidenotes usable (≥160px) from |
+|---|---|---|
+| **720px** (today) | **85** | **1112px** |
+| 680px | 80 | 1072px |
+| 640px | 76 | 1032px |
+| **610px** | **72** | **1002px** |
+| 560px | 66 | 952px |
 
-| cap | 1280 | 1440 | 1600 | wide band |
-|---|---|---|---|---|
-| **240** (today) | 240 | 240 | 240 | 1200 |
-| **300** | 244 | **300** | 300 | 1320 |
-| **360** | 244 | 324 | **360** | 1440 |
+Narrowing the measure to the ~72-character target lands the threshold at 1002px — effectively Quarto's 992px breakpoint.
 
-300px notes are available at 1440 and degrade to 244 at 1280 rather than breaking. **The cost is not viewport space, it is that `.kg-width-wide` grows in every already-published post** — 1200 → 1320 at a 300px cap. That is the tradeoff to design against, and it is a real one, but it is a content-migration question rather than a platform limit.
+**Narrowing alone shrinks the wide band, but widening the gutter by the same amount cancels that exactly:**
+
+| | measure | chars | wide band @1280+ | sidenote | usable from |
+|---|---|---|---|---|---|
+| today | 720 | 85 | **1200** | 240 | 1112px |
+| narrow only | 610 | 72 | 1090 — *changes published posts* | 240 | 1002px |
+| **narrow + compensate** | **610** | **72** | **1200** — *unchanged* | **295** | **1002px** |
+
+With `--content-width: 610px` and a `minmax(auto, 295px)` gutter, the gutter absorbs exactly what the measure gives up. `.kg-width-wide` stays at 1200px, so **every already-published post renders identically**, while the body reaches 72 characters, sidenotes get *wider* than today, and they engage 110px earlier.
+
+Three things to hold about this:
+
+- **It is an existence proof, not a recommendation.** It shows the option space has a corner with no migration cost. Which corner to take is a Mara/Athan call, not a design-session one — see below.
+- **610px is derived from 72 characters at the current 1.8rem body size.** If the type size changes, the pixel figure moves with it. State the target in characters and derive the pixels, never the reverse.
+- **Below 1280px nothing differs from today.** The wide band is viewport-limited to 1048px at 1120 in every variant. The gain is at 1280 and up, plus the earlier threshold.
+
+**What this means for the design session:** treat the measure, the margin width, and the reflow threshold as **fixed inputs you will be given**, not as variables to solve. They are coupled to each other and to the published-post corpus, and the decision sits with Mara and Athan. Ask for the numbers before specifying type or spacing that depends on them; do not pick them.
 
 ### Test posts
 
@@ -470,7 +487,7 @@ Not a live decision. Recorded so the arithmetic does not have to be re-derived.
 
 > **Scope warning — read before quoting anything below.** Every constraint in this appendix is the cost of **adding a new ~300px margin rail** to the grid. None of it describes the theme as it stands, and none of it is a limitation Ghost imposes.
 >
-> This section has been misread as the general constraint surface once, in the 2026-08-05 1:1, where the "seven rules," "the rail," the 1872px figure, `min-width: 0`, and `align-self: start` were all quoted as reasons the platform was locked. It is not locked — see "The grid is the theme's" above.
+> Quoted out of that context, the figures below read as though the platform were locked. It is not — see "The grid is the theme's" above.
 >
 > Specifically: the seven rules are re-declarations a *track-width change* would force, not a tax on touching CSS at all. `min-width: 0` and `align-self: start` are **preconditions for a TOC that does not exist**, not bugs to fix today — the only gutter occupant now is `.gh-pagehead`, which already carries `height: max-content` and `max-width: 200px`, so neither issue manifests. And the two thresholds below are distinct: a TOC could engage at 992px; **sidenotes engage at 1120px** (`footnotes.css`). They are not one number.
 
