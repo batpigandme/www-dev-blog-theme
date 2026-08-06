@@ -16,49 +16,100 @@
 * limitations under the License.
 */
 
-/*
-* "Cite this post" block styles. `.gh-citation-text` reuses the theme's
-* existing `--font-mono` / `--color-light-gray` tokens (already defined
-* in built/screen.css) for visual consistency with code blocks, rather
-* than introducing a second monospace stack.
+/**
+* Problem 2 — citation block (Direction A: plain prose citation, after
+* dataand.me). Replaces the boxed/backgrounded treatment in the current
+* theme file of the same name. Full replacement for
+* theme/assets/css/citation.css -- paste over the existing file.
 *
-* The citation is static, selectable text -- there are deliberately no
-* copy-to-clipboard controls. The visual weight here (box, border, fill,
-* type scale) is pending a design pass; see `docs/design-handoff.md`.
+* Markup restyled (unchanged, already in post.hbs):
+*
+*   <section class="gh-citation gh-canvas">
+*     <h2 class="gh-citation-heading">Cite this post</h2>
+*     <div class="gh-citation-block">
+*       <pre class="gh-citation-text" data-citation-format="apa"><code>...</code></pre>
+*     </div>
+*     <div class="gh-citation-block">
+*       <pre class="gh-citation-text" data-citation-format="bibtex"><code>...</code></pre>
+*     </div>
+*   </section>
+*
+* The container's own border/spacing is intentionally NOT set here --
+* bottom-matter.css moves that rule onto `.gh-citation-heading` so all
+* three bottom-matter rules share one width. This file owns typography
+* only.
 */
-.gh-citation {
-	margin-top: 4rem;
-	padding-top: 2.4rem;
-	border-top: 1px solid var(--color-light-gray);
-}
 
 .gh-citation-heading {
-	font-size: 1.6rem;
-	margin-bottom: 1.6rem;
+	margin-bottom: 2rem;
+	font-size: 1.8rem;
 }
 
 .gh-citation-block {
-	margin-bottom: 1.6rem;
+	margin-bottom: 2rem;
 }
 
+.gh-citation-block:last-child {
+	margin-bottom: 0;
+}
+
+/*
+* Strip the box. This replaces this same file's own prior `.gh-citation-text`
+* rule (background/border/radius) -- it's a same-selector replacement, not
+* an override needing a specificity argument.
+*/
 .gh-citation-text {
 	margin: 0;
-	padding: 1.6rem;
+	padding: 0;
 	overflow-x: auto;
-	background-color: var(--color-lighter-gray, #f6f6f6);
-	border: 1px solid var(--color-light-gray);
-	border-radius: 4px;
-	line-height: 1.5;
+	background: none;
+	border: none;
+	border-radius: 0;
+	line-height: 1.6;
 	white-space: pre-wrap;
 	word-break: break-word;
 }
 
 /*
-* Target the inner `<code>`, not the `<pre>`. built/screen.css sets
-* `code { font-family: var(--font-mono); font-size: 15px }` directly on
-* the element, so a `font-size` on the `<pre>` is inherited-then-
-* overridden and never takes effect regardless of load order.
+* APA citation reads as prose, not code. Overrides built/screen.css's
+* `code { font-family: var(--font-mono); font-size: 15px }`, which sets
+* both properties directly on the element (specificity (0,0,1)). A
+* class + attribute + type selector has specificity (0,2,1) -- it wins on
+* specificity regardless of load order.
 */
-.gh-citation-text code {
+.gh-citation-text[data-citation-format="apa"] code {
+	font-family: inherit;
+	font-size: 1.6rem;
+	color: var(--color-primary-text);
+}
+
+/*
+* BibTeX stays monospace but drops a register from body copy: smaller,
+* secondary-text color. Same specificity argument against the
+* built/screen.css `code` rule as above.
+*/
+.gh-citation-text[data-citation-format="bibtex"] code {
 	font-size: 1.3rem;
+	color: var(--color-secondary-text, #757575);
+}
+
+/*
+* "BibTeX" label, CSS-generated rather than templated. The second
+* `.gh-citation-block` in document order is always the BibTeX block (see
+* the markup comment above) -- post.hbs never needs to change for this.
+*/
+.gh-citation-block + .gh-citation-block {
+	position: relative;
+	padding-top: 2.2rem;
+}
+
+.gh-citation-block + .gh-citation-block::before {
+	content: "BibTeX";
+	position: absolute;
+	top: 0;
+	left: 0;
+	font-size: 1.1rem;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+	color: var(--color-secondary-text, #757575);
 }
