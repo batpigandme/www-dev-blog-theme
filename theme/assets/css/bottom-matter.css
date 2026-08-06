@@ -1,0 +1,101 @@
+/**
+* @license Apache-2.0
+*
+* Copyright (c) 2026 The Stdlib Authors.
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*    http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
+
+/**
+* Problem 3 — bottom-matter structure. Reconciles the three-rules/two-widths
+* problem onto one width (main-track, matching `.gh-footnotes`'s existing
+* rule) and styles the theme-ignored author-bio class. New file.
+*
+* Requires one post.hbs change (add `.gh-bottom-rule` as the first child of
+* `.gh-article-footer`) -- see the handoff doc. Must load after
+* citation.css AND built/screen.css -- see the <link> order in the handoff
+* doc; the override comments below assume that order.
+*/
+
+/*
+* Remove the full-bleed border from `.gh-citation` itself. citation.css
+* does not set a border on `.gh-citation` (only on `.gh-citation-heading`
+* now, and only via this file below), so the border this cancels is the
+* ORIGINAL theme rule these two new files replace: `border-top: 1px solid
+* var(--color-light-gray)` at specificity (0,1,0). This file's `.gh-citation`
+* rule is the same specificity; loading after citation.css settles it by
+* load order. The visible rule moves to `.gh-citation-heading`, which is
+* already confined to main-start/main-end by the theme's own
+* `.gh-canvas > * { grid-column: main-start/main-end }` rule -- no width
+* value is needed here, it inherits the main track automatically, so this
+* rule keeps working unchanged if `--content-width` ever moves.
+*/
+.gh-citation {
+	border-top: none;
+	margin-top: 0;
+	padding-top: 0;
+}
+
+.gh-citation-heading {
+	margin-top: 4rem;
+	padding-top: 2rem;
+	border-top: 1px solid var(--hr-background-color);
+}
+
+/*
+* Same move for `.gh-article-footer` (built/screen.css:
+* `border-top: 1px solid var(--color-light-gray)`, specificity (0,1,0) --
+* this file loads after built/screen.css, so it wins on load order at equal
+* specificity). `.gh-navigation` keeps its own wide-track placement
+* (untouched -- `.gh-navigation { grid-column: wide-start/wide-end }` lives
+* in built/screen.css and is not overridden here); only the rule moves, onto
+* the new `.gh-bottom-rule` element added by the post.hbs change below,
+* confined to main-start/main-end by the same baseline canvas rule as the
+* citation heading above.
+*/
+.gh-article-footer {
+	border-top: none;
+	margin-top: 0;
+	padding-top: 0;
+}
+
+.gh-bottom-rule {
+	margin-top: 8rem;
+	padding-top: 3.2rem;
+	border-top: 1px solid var(--hr-background-color);
+}
+
+/*
+* The three rules above are now identical: 1px, var(--hr-background-color),
+* confined to main-start/main-end. `.gh-footnotes`'s own rule (in
+* footnotes.css, already main-track width and already
+* var(--hr-background-color)) is untouched -- it was already correct; the
+* other two now match it instead of it being widened to match them.
+*/
+
+/*
+* Author bio. Markup and class (`dev-theme-author-blurb`) are already
+* pasted into 12 of 21 posts from a canonical per-author file -- this
+* selector already exists in rendered content, no template change needed.
+* The theme currently styles it nowhere (renders as a plain paragraph);
+* this gives it the de-emphasized, italic treatment used in the mockups.
+* No existing rule targets this class, so no override/specificity argument
+* applies.
+*/
+.gh-content .dev-theme-author-blurb {
+	margin-top: 4rem;
+	font-size: 1.5rem;
+	line-height: 1.6;
+	font-style: italic;
+	color: var(--blockquote-color);
+}

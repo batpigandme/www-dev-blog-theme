@@ -405,7 +405,7 @@
 		section = document.createElement( 'section' );
 		section.className = 'gh-footnotes';
 		section.setAttribute( 'role', 'doc-endnotes' );
-		section.innerHTML = '<h2 id="footnote-label" class="gh-footnotes-title">Footnotes</h2>';
+		section.innerHTML = '<h2 id="footnote-label" class="gh-footnotes-title">Notes and references</h2>';
 		list = document.createElement( 'ol' );
 		for ( i = 0; i < notes.length; i++ ) {
 			list.appendChild( noteElement( notes[ i ] ) );
@@ -417,12 +417,6 @@
 			removeNoteSource( notes[ i ].el );
 		}
 		content.appendChild( section );
-
-		// Adopt an author heading (e.g., "Sources") stranded directly above the new section...
-		if ( headingCandidate && headingCandidate.nextElementSibling === section ) {
-			section.querySelector( '#footnote-label' ).textContent = headingCandidate.textContent;
-			headingCandidate.remove();
-		}
 	}
 
 	/**
