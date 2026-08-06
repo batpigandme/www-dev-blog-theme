@@ -384,7 +384,17 @@ This bounds the type scale (and any future TOC):
 
 Margin sidenotes are **not** grid items — `.gh-content.gh-canvas` gets `position: relative` and clones are absolutely positioned with JS-computed `left`, `width`, and `top`, explicitly resetting `grid-column`/`grid-row` to `auto`. They engage at `min-width: 1120px` with a 160px gutter floor, a 24px gap from the main column, and a 240px cap. Mirroring is opt-in per post via a `#sidenotes` internal Ghost tag; asides are margin-eligible independently.
 
-**The width problem this bounds but does not solve:** 240px is genuinely tight for these drafts' notes — `the-stakeholder-journey`'s third footnote is about 380 characters, roughly 18–20 lines in that column. The honest fix is editorial, not grid: short marginal glosses in the margin, full citations in the endnotes. Proposing that authoring convention is a design contribution; widening the grid is not available (see the appendix).
+**The width problem this bounds but does not solve:** 240px is genuinely tight for these drafts' notes — `the-stakeholder-journey`'s third footnote is about 380 characters, roughly 18–20 lines in that column. The honest fix may be editorial rather than structural: short marginal glosses in the margin, full citations in the endnotes. Proposing that authoring convention is a design contribution.
+
+**Correction (2026-08-06): widening the gutter *is* available, contrary to what this section previously said.** It cited the appendix's 1872px figure, but that figure is for a different layout — preserving the 1200px wide band and adding note columns *outside* it. Simply raising the `minmax(auto, 240px)` cap grows the wide band instead. Measured against the real track list:
+
+| cap | 1280 | 1440 | 1600 | wide band |
+|---|---|---|---|---|
+| **240** (today) | 240 | 240 | 240 | 1200 |
+| **300** | 244 | **300** | 300 | 1320 |
+| **360** | 244 | 324 | **360** | 1440 |
+
+300px notes are available at 1440 and degrade to 244 at 1280 rather than breaking. **The cost is not viewport space, it is that `.kg-width-wide` grows in every already-published post** — 1200 → 1320 at a 300px cap. That is the tradeoff to design against, and it is a real one, but it is a content-migration question rather than a platform limit.
 
 ### Test posts
 
