@@ -16,9 +16,25 @@
 * limitations under the License.
 */
 
-/*
-* Figure caption overrides.
+/**
+* Figure caption width (the flagged "fourth item"). Full replacement for
+* theme/assets/css/captions.css -- paste over the existing file. Already
+* registered in default.hbs; no <link> change needed.
+*
+* Applies uniformly to every figcaption -- `.kg-width-wide`,
+* `.kg-width-full`, and the feature-image caption in the article header --
+* since all three are plain `<figcaption>` elements and this selector
+* already covers all of them without a template change.
+*
+* 480px is derived from the caption's own 14px/1.4 type (`figcaption` in
+* built/screen.css), not from `--content-width` -- it does not depend on
+* the open measure/margin decision and needs no change if that value moves.
+*
+* `text-align: left` is carried forward unchanged from the prior version
+* of this file (same rule, not an override). `max-width` is new -- no
+* existing rule sets it, so no specificity argument applies.
 */
 figcaption {
 	text-align: left;
+	max-width: 480px;
 }
