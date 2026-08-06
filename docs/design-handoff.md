@@ -413,15 +413,19 @@ Margin sidenotes are **not** grid items — `.gh-content.gh-canvas` gets `positi
 
 Measured from each site's own stylesheet (both Apache-2.0; `distillpub/template` and Quarto's Distill-derived `page-columns`):
 
-| | margin width | engages at |
-|---|---|---|
-| distill.pub | 152px @ 12px | **768px** right, 1000px left |
-| dataand.me (Quarto) | **200px** | **992px** |
-| **this theme** | **240px** @ 13px | **1120px** |
+| | margin track | measure track | engages at |
+|---|---|---|---|
+| distill.pub | 152px fixed @ 12px | fixed 704px | **768px** right, 1000px left |
+| Quarto (`body.floating`) | **`minmax(100px, 250px)`** | `minmax(500px, calc(800px - 3em))` | **992px** (Bootstrap `lg`) |
+| **this theme** | **`minmax(auto, 240px)`** @ 13px | `min(720px, calc(100% - var(--gap)*2))` | **1120px** |
 
-**This theme has the widest margin of the three and the latest threshold.** That inverts the framing the readability complaint has been carrying. The notes are not cramped relative to the layouts being emulated — they simply require an unusually wide window to appear at all.
+Quarto figures read from source (`_bootstrap-variables.scss`, `_bootstrap-mixins.scss`, Apache-2.0 / MIT). Its margin is three `minmax` segments — `minmax(25px,50px) minmax(50px,150px) minmax(25px,50px)` — summing to `minmax(100px, 250px)`, so the 200px observed on `dataand.me` is a resolved value, not the declaration.
 
-**The cause is the measure, not the margin.** Both references let the text column shrink: Quarto's is `minmax(500px, calc(750px - 4rem))`, which gives back ~130px under pressure. This theme's is `min(720px, calc(100% - var(--gap) * 2))`, which holds 720px rigidly until the viewport cannot fit it at all — so margins cannot reach usable width until 720px plus two gutters fits, which is 1120px.
+**This theme has the latest threshold of the three, and its margin ceiling is not the outlier** — 240px against Quarto's 250px. The notes are not cramped relative to the layouts being emulated; they require an unusually wide window to appear at all.
+
+**The cause is the measure, not the margin.** Both references let the text column shrink — Quarto's floor is 500px against an ~752px ceiling, so it yields ~250px under pressure. This theme's `min(720px, …)` yields *nothing* until the viewport is already narrower than 720px, so the margins have no slack to draw on and cannot reach usable width until 720px plus two gutters fits. That is where 1120px comes from.
+
+**The track ordering differs too, and it follows from the same choice.** Quarto's outer gutters are `5fr`, so they absorb slack only *after* the content and margin tracks reach their maxima — content columns are served first, edges take the remainder. In `.gh-canvas` the capped 240px tracks fill first and the outer `minmax(var(--gap), auto)` tracks take what is left. Ghost's arrangement is not wrong, but it means the margin can only ever be paid for out of surplus.
 
 **So an earlier sidenote threshold is bought with measure, not with viewport, and that is a different trade from widening the gutter.** Widening costs a re-render of every published post (see below). Lowering the threshold costs reading measure at mid-range widths, and nothing else. The design session should treat these as two separate decisions:
 
