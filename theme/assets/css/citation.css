@@ -85,11 +85,16 @@
 * later in built/screen.css, resolves to pure `#000`, 21:1 against white)
 * to `--color-dark-gray` (9.74:1) -- de-emphasized relative to body copy,
 * matching the BibTeX line and the "reference material, not competing for
-* visual weight" goal this file opens with.
+* visual weight" goal this file opens with. Font-size drops from 1.6rem
+* (identical to body copy -- the citation read as importantly as the post
+* itself) to 1.4rem, one step above BibTeX's 1.3rem rather than identical:
+* a monospace face at the same rem size reads visually larger than a
+* proportional one (bigger x-height share), so this is closer to an
+* optical match than a literal one.
 */
 .gh-citation-text[data-citation-format="apa"] code {
 	font-family: var(--font-sans);
-	font-size: 1.6rem;
+	font-size: 1.4rem;
 	color: var(--color-dark-gray);
 }
 
