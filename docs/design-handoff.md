@@ -55,6 +55,26 @@ Concretely:
 
 ---
 
+## The reference lineage — one target, already agreed
+
+The three sites cited throughout this document are not three independent examples. They are one design language, and **both stakeholders have independently endorsed it**, which makes it a shared anchor rather than one person's taste:
+
+- **[distill.pub](https://distill.pub/2020/circuits/weight-banding/)** — the origin. Mara's long-standing marginalia reference.
+- **[transformer-circuits.pub](https://transformer-circuits.pub/2026/workspace/index.html)** — Distill-descended. Athan has seen it and likes it.
+- **[dataand.me](https://dataand.me)** — Mara's own site, Distill-derived, and the most useful of the three to interrogate: she can say *why* each number is what it is, where the other two can only be measured.
+
+**What to take from it: the result, not the mechanism.** Inspected in devtools (2026-08-06), Distill's layout is a modular column grid — roughly eighteen 60px tracks with semantic line names layered over them (`screen` → `page` → `middle` → `text`, plus `kicker` and `gutter`) — and each section is its own nested grid instance (`d-title`, `d-byline`, `d-article`, `d-appendix` all carry `grid` separately).
+
+That is a substantially heavier mechanism than this theme needs, and porting it is not proposed. Ghost's `.gh-canvas` already provides the same semantic zones (`full` / `wide` / `main`) at coarser resolution. **The gap between this theme and the reference is not track count** — it is the treatment of margins, bottom matter, and metadata, which are Problems 1–3.
+
+**One concrete, in-scope borrowing.** Distill puts publication metadata in a labeled band between the title and the body — `AUTHORS` / `AFFILIATIONS` / `PUBLISHED` / `DOI`, four columns, small caps labels over plain values — with the **DOI as a first-class front-matter field** rather than buried in a citation box at the foot of the page.
+
+That is a live option for Problem 2 that has not been raised: metadata as *front* matter rather than bottom matter. It also bears on the open DOI-storage question, since displaying a DOI in the header rather than only inside the BibTeX entry changes how much the `canonical_url`-versus-custom-field decision actually matters.
+
+*Provenance note: distill.pub and transformer-circuits.pub are unreachable from the environment these corrections were made in, so any measured figures attributed to them come from Mara's own devtools inspection, not from a re-measurement.*
+
+---
+
 ## Problem 1 — Header width coupling
 
 **Current mechanism**, verbatim from `built/screen.css`:
@@ -145,6 +165,7 @@ with `.gh-citation` at `margin-top: 4rem`, `padding-top: 2.4rem`, `border-top: 1
 
 - [dataand.me's citation section](https://dataand.me/blog/2021-12_madam-im-yadm/#citation) — plain text, a lighter-weight code block for the BibTeX entry, no box or background around the prose citation.
 - Distill.pub — a two-column label/content layout for its meta sections (Citation, Footnotes, Acknowledgments, Reuse), each clearly delineated without heavy chrome.
+- **Distill's front-matter band** — `AUTHORS` / `AFFILIATIONS` / `PUBLISHED` / `DOI` between title and body, DOI first-class. Raises the question of whether any of this block belongs at the *top* of the post rather than the bottom. See "The reference lineage" above.
 
 **Fields available today:** title, author(s), date, canonical URL — all already on the post context. DOI is not available yet (pending Rogue Scholar registration, a separate multi-week process). One question is a genuine design input rather than a policy call: **where a minted DOI is stored** — the post's `canonical_url`, which the front-matter.de workflows use, or a separate custom field — determines whether the `url` line needs a conditional or can simply read `canonical_url` when set. Worth settling the shape now so the redesign leaves the right seam.
 
@@ -170,7 +191,7 @@ About-stdlib + star/support CTA   ← pasted verbatim into every post from commo
 > Disclaimer: …     ← blockquote
 ```
 
-**Reference:** Distill.pub labels each of these as its own delineated section (References, Footnotes, Reuse, Citation, Acknowledgments, Updates and Corrections). Mara's personal blog does something similar and she likes that pattern.
+**Reference** (see "The reference lineage" above for why these three are one target): Distill.pub labels each of these as its own delineated section — References, Footnotes, Reuse, Citation, Acknowledgments, Updates and Corrections. `dataand.me` does something similar. This is the clearest case in the document where the reference set is directly applicable, since bottom-matter sectioning is exactly what Distill does well and what this theme currently does not do at all.
 
 **Why this is not a straight port of either:** neither carries an NSF-acknowledgment disclaimer or an author-bio section, both of which stdlib's posts need. The section set here is larger than either reference model, and the ordering and grouping of NSF-required content alongside the standard citation/footnote sections is a genuinely open structural question, not just a typography one.
 
