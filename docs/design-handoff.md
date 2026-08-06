@@ -16,6 +16,8 @@ Concretely:
 
 - Every direction has to be expressible as **Handlebars template changes** plus **additive CSS/JS files**. No arbitrary markup, no build step of our own.
 - **`theme/assets/built/screen.css` is minified and cannot be regenerated.** The build needs a `shared` package that is not vendored, and no script rebuilds it. Never edit it. New rules ship as new files in `theme/assets/css/`, registered in `theme/default.hbs` after `built/screen.css`.
+
+  **"Never edit it" is not "cannot change it."** This distinction has been misread once already, so it is worth stating flatly: that file is *ours*, it is served as-is, and any rule in it can be overridden wholesale by a later file at equal specificity. The constraint is on the editing method, not on the outcome. See "The grid is the theme's" below.
 - **`theme/assets/css/screen.css` is the authored source of record but is not served.** It genuinely is the last of eighteen sources compiled into the built file, so it is the only readable map of what this theme customized on top of Ghost's Source and Journal layers — but nothing rebuilds it, so editing it is a silent no-op. Read it; never expect a change there to ship.
 - Content structure is bounded by **Ghost's own primitives**: the Koenig card system (`.kg-width-wide` / `.kg-width-full` figures, separate cards that cannot share inline markdown — which is why footnote cross-links needed a JS fix), the `post_class` helper's conditional classes (`no-image` is the root cause of Problem 1), and the `.gh-canvas` named-grid-line system.
 - Anything that looks right in a static mockup **still has to be verified against a real Ghost render**. Ghost's helpers inject classes and wrap content in ways a naive mock misses — this bit us directly: `{{url}}` rendering relative instead of absolute only showed up against a live page, not in the artifact mockup.
@@ -277,6 +279,16 @@ Gutters are exactly 0 until the viewport exceeds 792; they saturate at 240 from 
 
 **Verified:** `gh-canvas` appears exactly twice in the whole built stylesheet, in one contiguous run, and **no `@media` or `@supports` block contains it.** Responsive behavior comes entirely from `@media (max-width: 767px) { :root { --gap: 2rem } }` re-computing `var(--gap)` inside the same track list. There is no conditional variant to account for.
 
+### The grid is the theme's, and it is already fully overridden
+
+Every rule above lives in **our** `built/screen.css`. None of it comes from Ghost. Verified against the running Ghost install's own `content/public/cards.min.css` (45KB): `.gh-canvas` appears **zero** times; its nine `grid-template-columns` are all card-internal (`.kg-collection-card-grid`, `.kg-product-card-container`, `.kg-layout-split`); its `.kg-width-wide` / `.kg-width-full` rules set only `padding` and `font-size` *inside* header and signup cards, never `grid-column`; and its single `240px` is `.kg-bookmark-publisher`'s text-ellipsis cap, unrelated to the gutter.
+
+**There is no Ghost grid to override, and the override is already shipped.** `theme/assets/css/measure.css` re-declares the entire `grid-template-columns` value for `.gh-canvas` and wins on load order at equal specificity. Widening the gutters is a one-line edit to a file we own — `minmax(auto, 240px)` — not a platform negotiation.
+
+**What actually constrains the numbers is content, not CSS.** Changing track widths re-renders **every already-published post** against the new grid: widen the gutters and `.kg-width-wide` figures narrow retroactively; change `--content-width` and `config.image_sizes.m.width = 720` no longer matches the column its images were sized for. The grid is free. The 21 posts already rendered against it are not. Any width proposal should state its migration cost, and that cost is the real reason 240px and 720px still stand.
+
+**One genuine cascade gap, unrelated to layout.** `{{ghost_head}}` sits at `default.hbs:111`, *after* all ten of our stylesheets, and it injects `/public/cards.min.css` last. So card-internal styling — callouts, bookmarks, toggles, product cards — currently cannot be overridden by any of our files. A `<link>` placed after `{{ghost_head}}` would fix that. It buys nothing for the grid.
+
 ### Typography
 
 | Element | Size | Line-height | Note |
@@ -397,6 +409,12 @@ For density: `mara-averick/the-stakeholder-journey` (feature image, excerpt, 2:1
 ## Appendix — table of contents, for when it is scoped
 
 Not a live decision. Recorded so the arithmetic does not have to be re-derived.
+
+> **Scope warning — read before quoting anything below.** Every constraint in this appendix is the cost of **adding a new ~300px margin rail** to the grid. None of it describes the theme as it stands, and none of it is a limitation Ghost imposes.
+>
+> This section has been misread as the general constraint surface once, in the 2026-08-05 1:1, where the "seven rules," "the rail," the 1872px figure, `min-width: 0`, and `align-self: start` were all quoted as reasons the platform was locked. It is not locked — see "The grid is the theme's" above.
+>
+> Specifically: the seven rules are re-declarations a *track-width change* would force, not a tax on touching CSS at all. `min-width: 0` and `align-self: start` are **preconditions for a TOC that does not exist**, not bugs to fix today — the only gutter occupant now is `.gh-pagehead`, which already carries `height: max-content` and `max-width: 200px`, so neither issue manifests. And the two thresholds below are distinct: a TOC could engage at 992px; **sidenotes engage at 1120px** (`footnotes.css`). They are not one number.
 
 **The reference to port** is [transformer-circuits.pub's Global Workspace paper](https://transformer-circuits.pub/2026/workspace/index.html), a Distill-descended layout Athan has seen and likes. Measured by DOM inspection at a 1600px viewport: a static (non-fixed) left TOC rail at x:142–390 (**248px**); the text column at x:448–1152 (**704px**, close to the ~72-character target); `figure.wide` breaking out to roughly x:295–1305 (**~1000px**) — past the text column on both sides, using the margin space on the right and stopping just short of the TOC's right edge on the left. **Wide figures eat the margin without ever touching the rail.** That relationship is the mechanism worth porting, not the general look.
 
