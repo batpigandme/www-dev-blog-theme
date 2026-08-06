@@ -76,11 +76,21 @@
 * both properties directly on the element (specificity (0,0,1)). A
 * class + attribute + type selector has specificity (0,2,1) -- it wins on
 * specificity regardless of load order.
+*
+* `font-family: inherit` was wrong here -- browsers default `<pre>` itself
+* to `font-family: monospace` via the UA stylesheet, and citation.css never
+* overrides that on `.gh-citation-text`, so `inherit` just pulled monospace
+* back in from the parent. Name the sans stack explicitly instead. Color
+* also drops from `--color-primary-text` (which, via a second `:root` rule
+* later in built/screen.css, resolves to pure `#000`, 21:1 against white)
+* to `--color-dark-gray` (9.74:1) -- de-emphasized relative to body copy,
+* matching the BibTeX line and the "reference material, not competing for
+* visual weight" goal this file opens with.
 */
 .gh-citation-text[data-citation-format="apa"] code {
-	font-family: inherit;
+	font-family: var(--font-sans);
 	font-size: 1.6rem;
-	color: var(--color-primary-text);
+	color: var(--color-dark-gray);
 }
 
 /*
