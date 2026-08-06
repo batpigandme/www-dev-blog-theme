@@ -121,6 +121,7 @@
 	.gh-sidenote {
 		display: block;
 		position: absolute;
+		overflow: hidden;
 
 		/*
 		* Reset the `.gh-canvas > *` grid placement: an absolutely positioned
@@ -140,7 +141,17 @@
 		line-height: 1.45;
 	}
 
+	/*
+	* Float the number so the note's text (JS-injected as block-level HTML,
+	* e.g. a `<p>`) wraps beside it on the first lines instead of starting
+	* on its own line below -- a `<span>`'s `margin-right` has no effect
+	* on a following block box, which is why this sat stacked before.
+	* `overflow: hidden` on `.gh-sidenote` (its own rule, above) clears the
+	* float so JS's `offsetHeight`-based stacking math still measures the
+	* note's true height.
+	*/
 	.gh-sidenote .gh-sidenote-number {
+		float: left;
 		margin-right: 0.4rem;
 		font-weight: 600;
 	}
