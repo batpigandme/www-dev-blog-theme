@@ -288,7 +288,7 @@
 		var i;
 
 		// Definitions: paragraphs beginning with `[^label]:`
-		defsByLabel = {};
+		defsByLabel = Object.create( null ); // guard against literal labels which collide with `Object.prototype` properties (e.g., `[^constructor]`)
 		paragraphs = toArray( content.querySelectorAll( 'p' ) );
 		for ( i = 0; i < paragraphs.length; i++ ) {
 			p = paragraphs[ i ];
@@ -453,6 +453,7 @@
 	* @returns {Element} `<li>` element
 	*/
 	function noteElement( note ) {
+		var target;
 		var li;
 		var a;
 		var i;
@@ -462,6 +463,12 @@
 
 		// `doc-endnote` is deprecated in DPUB-ARIA 1.1; the native `<li>` inside the `<ol>` already exposes an implicit `listitem` role.
 		li.innerHTML = note.html;
+
+		// Append backlinks inside a trailing paragraph so they render on the same line as the note text (note content is trimmed, so a trailing `<p>` is the last child)...
+		target = li;
+		if ( li.lastChild && li.lastChild.nodeType === 1 && li.lastChild.tagName === 'P' ) {
+			target = li.lastChild;
+		}
 		for ( i = 0; i < note.refIds.length; i++ ) {
 			a = document.createElement( 'a' );
 			a.href = '#' + note.refIds[ i ];
@@ -473,8 +480,8 @@
 				a.setAttribute( 'aria-label', 'Back to occurrence ' + ( i + 1 ) + ' of reference ' + note.number );
 				a.innerHTML = '↩<sup>' + ( i + 1 ) + '</sup>';
 			}
-			li.appendChild( document.createTextNode( ' ' ) );
-			li.appendChild( a );
+			target.appendChild( document.createTextNode( ' ' ) );
+			target.appendChild( a );
 		}
 		return li;
 	}
@@ -610,7 +617,14 @@
 		left = mainRight + SIDENOTE_GAP;
 		width = Math.min( gutter, SIDENOTE_MAX_WIDTH );
 
-		// Batch reads: desired vertical positions keyed by first reference (notes) or natural position (asides)...
+		// Absolutize asides FIRST so subsequent measurements reflect the final flow (an in-flow aside shifts all following content up once it leaves the flow)...
+		for ( i = 0; i < asides.length; i++ ) {
+			asides[ i ].classList.add( 'gh-aside--margin' );
+			asides[ i ].style.left = left + 'px';
+			asides[ i ].style.width = width + 'px';
+		}
+
+		// Batch reads: desired vertical positions keyed by first reference (notes) or nearest in-flow sibling (asides)...
 		entries = [];
 		if ( sidenotesEnabled ) {
 			for ( i = 0; i < notes.length; i++ ) {
@@ -628,24 +642,21 @@
 			entries.push({
 				'note': null,
 				'el': asides[ i ],
-				'top': asides[ i ].getBoundingClientRect().top - contentRect.top
+				'top': anchorTop( asides[ i ], contentRect )
 			});
 		}
 		entries.sort( byTop );
 
-		// Batch writes: create clones, absolutize asides, and stack without overlap...
+		// Batch writes: create clones and stack without overlap...
 		for ( i = 0; i < entries.length; i++ ) {
 			if ( entries[ i ].note ) {
 				el = sidenoteElement( entries[ i ].note );
+				el.style.left = left + 'px';
+				el.style.width = width + 'px';
 				content.appendChild( el );
 				sidenotes.push( el );
-			} else {
-				el = entries[ i ].el;
-				el.classList.add( 'gh-aside--margin' );
+				entries[ i ].el = el;
 			}
-			el.style.left = left + 'px';
-			el.style.width = width + 'px';
-			entries[ i ].el = el;
 		}
 		bottom = 0;
 		for ( i = 0; i < entries.length; i++ ) {
@@ -672,6 +683,53 @@
 			asides[ i ].style.width = '';
 			asides[ i ].style.top = '';
 		}
+	}
+
+	/**
+	* Computes the desired top for a margin aside from its nearest in-flow sibling.
+	*
+	* ## Notes
+	*
+	* -   Once absolutized, an aside has no meaningful flow position of its own, so we anchor to the next in-flow sibling (the content which moves up into the aside's former slot), falling back to the bottom of the previous in-flow sibling.
+	* -   Zero-size siblings (e.g., hidden elements emitted by an HTML card) are skipped, as their bounding rectangles are all zeros and would yield garbage anchors.
+	*
+	* @private
+	* @param {Element} el - margin aside
+	* @param {Object} contentRect - content bounding rectangle
+	* @returns {number} top offset (in pixels)
+	*/
+	function anchorTop( el, contentRect ) {
+		var rect;
+		var sib;
+
+		sib = el.nextElementSibling;
+		while ( sib ) {
+			rect = sib.getBoundingClientRect();
+			if ( !isMarginPositioned( sib ) && ( rect.width > 0 || rect.height > 0 ) ) {
+				return rect.top - contentRect.top;
+			}
+			sib = sib.nextElementSibling;
+		}
+		sib = el.previousElementSibling;
+		while ( sib ) {
+			rect = sib.getBoundingClientRect();
+			if ( !isMarginPositioned( sib ) && ( rect.width > 0 || rect.height > 0 ) ) {
+				return rect.bottom - contentRect.top;
+			}
+			sib = sib.previousElementSibling;
+		}
+		return 0;
+	}
+
+	/**
+	* Tests whether an element is positioned in the margin column (and, hence, out of the document flow).
+	*
+	* @private
+	* @param {Element} el - element to test
+	* @returns {boolean} boolean result
+	*/
+	function isMarginPositioned( el ) {
+		return el.classList.contains( 'gh-aside--margin' ) || el.classList.contains( 'gh-sidenote' );
 	}
 
 	/**
