@@ -1,0 +1,215 @@
+/**
+* @license Apache-2.0
+*
+* Copyright (c) 2026 The Stdlib Authors.
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*    http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
+
+/*
+* Styles for footnotes, margin sidenotes, and author asides.
+*
+* ## Notes
+*
+* -   This stylesheet is a companion to `js/footnotes.js`, which normalizes footnote markup emitted by Ghost into a single accessible endnotes section and mirrors notes into the right margin on wide viewports.
+*/
+
+/*
+* Establish a positioning context for absolutely positioned sidenotes.
+*
+* ## Notes
+*
+* -   `position: relative` composes safely with the `.gh-canvas` grid.
+*/
+.gh-content.gh-canvas {
+	position: relative;
+}
+
+/*
+* Footnote references (superscript numbers in body text).
+*/
+.gh-fnref {
+	line-height: 0;
+}
+
+.gh-content .gh-fnref a {
+	padding: 0 0.15em;
+	color: var(--link-color);
+	font-size: 0.75em;
+	font-variant-numeric: tabular-nums;
+	text-decoration: none;
+}
+
+.gh-content .gh-fnref a:focus-visible,
+.gh-footnotes a:focus-visible {
+	outline: 2px solid var(--stdlib-blue);
+	outline-offset: 2px;
+}
+
+/*
+* Endnotes section appended at the end of the post content.
+*/
+.gh-footnotes {
+	margin-top: 4rem;
+	padding-top: 2rem;
+	border-top: 1px solid var(--hr-background-color);
+	color: var(--blockquote-color);
+	font-size: 1.5rem;
+}
+
+.gh-footnotes .gh-footnotes-title {
+	margin: 0;
+	border-bottom: none;
+	font-size: 1.8rem;
+}
+
+.gh-footnotes ol {
+	margin-top: 1.6rem;
+	padding-left: 2.8rem;
+}
+
+.gh-footnotes li + li {
+	margin-top: 0.8rem;
+}
+
+.gh-footnotes a[role="doc-backlink"] {
+	padding: 0 0.25em;
+	text-decoration: none;
+}
+
+/*
+* Highlight the jump target in both directions (ref -> note, note -> ref).
+*/
+.gh-footnotes li:target,
+.gh-fnref a:target {
+	background: var(--code-background-color);
+	outline: 2px solid var(--gh-target-highlight-color);
+	outline-offset: 2px;
+}
+
+/*
+* Progressive enhancement: highlight the whole superscript wrapper when `:has()` is supported.
+*
+* ## Notes
+*
+* -   This is kept as a separate rule so browsers without `:has()` do not drop the rule above (an invalid selector voids its entire list).
+*/
+.gh-fnref:has(a:target) {
+	background: var(--code-background-color);
+	outline: 2px solid var(--gh-target-highlight-color);
+	outline-offset: 2px;
+}
+
+/*
+* Margin sidenotes (aria-hidden visual clones of endnotes; see footnotes.js).
+*
+* ## Notes
+*
+* -   Hidden by default and hard-hidden below the wide-viewport threshold so a missed JavaScript deactivation cannot leak into narrow layouts.
+*/
+.gh-sidenote {
+	display: none;
+}
+
+@media (min-width: 1120px) {
+	.gh-sidenote {
+		display: block;
+		position: absolute;
+
+		/*
+		* Reset the `.gh-canvas > *` grid placement.
+		*
+		* ## Notes
+		*
+		* -   An absolutely positioned grid child with an explicit grid area is positioned relative to that area, whereas `auto` placement makes the grid container's padding box the containing block (which is what the JavaScript layout math assumes).
+		*/
+		grid-column: auto;
+		grid-row: auto;
+
+		/*
+		* Cancel the `.gh-content > * + *` vertical-rhythm margin, which would offset the JavaScript-computed `top`.
+		*/
+		margin: 0;
+		padding-top: 0.4rem;
+		border-top: 1px solid var(--hr-background-color);
+		color: var(--blockquote-color);
+		font-size: 1.3rem;
+		line-height: 1.45;
+	}
+
+	.gh-sidenote .gh-sidenote-number {
+		margin-right: 0.4rem;
+		font-weight: 600;
+	}
+
+	/*
+	* Links in clones remain visible but are made non-tabbable by JavaScript.
+	*/
+	.gh-content .gh-sidenote a {
+		color: inherit;
+		text-decoration: underline;
+	}
+}
+
+/*
+* Author asides (`<aside class="gh-aside">` in an HTML card).
+*
+* ## Notes
+*
+* -   In-flow, visually delineated block by default (all narrow viewports, and any wide viewport where JavaScript did not run).
+* -   Long words (e.g., DOIs) must wrap.
+*/
+.gh-content .gh-aside {
+	padding: 1.2rem 1.6rem;
+	border-left: 3px solid var(--stdlib-orange);
+	border-radius: 0 4px 4px 0;
+	background: var(--code-background-color);
+	color: var(--blockquote-color);
+	font-size: 1.5rem;
+	overflow-wrap: break-word;
+}
+
+.gh-content .gh-aside > :first-child {
+	margin-top: 0;
+}
+
+.gh-content .gh-aside > :last-child {
+	margin-bottom: 0;
+}
+
+/*
+* Margin placement for asides on wide viewports.
+*
+* ## Notes
+*
+* -   The `gh-aside--margin` class is added by footnotes.js only while it is actively laying out the margin column, so a JavaScript failure degrades gracefully to the in-flow block.
+*/
+@media (min-width: 1120px) {
+	.gh-content .gh-aside--margin {
+		position: absolute;
+
+		/*
+		* See the `.gh-sidenote` grid-placement reset above.
+		*/
+		grid-column: auto;
+		grid-row: auto;
+		margin: 0;
+		padding: 0.4rem 0 0;
+		border-left: none;
+		border-radius: 0;
+		border-top: 1px solid var(--hr-background-color);
+		background: transparent;
+		font-size: 1.3rem;
+		line-height: 1.45;
+	}
+}

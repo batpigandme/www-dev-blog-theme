@@ -104,6 +104,15 @@ html[data-theme="dark"] {
 	--heading-border-bottom-color: #b5b5b5;
 
 	/*
+	* Footnote jump target should be stdlib orange.
+	*
+	* ## Notes
+	*
+	* -   Already ~8:1 against the dark background, which is well past the 3:1 WCAG 2.4.11 minimum.
+	*/
+	--gh-target-highlight-color: #f0ad3e;
+
+	/*
 	* Positive sentiment icons should be orange (slightly lighter than stdlib orange in order to satisfy WebAIM contrast requirements).
 	*/
 	--feedback-positive-sentiment-icon-color: #ff9514;
