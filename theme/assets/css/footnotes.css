@@ -19,15 +19,17 @@
 /*
 * Styles for footnotes, margin sidenotes, and author asides.
 *
-* Companion to `js/footnotes.js`, which normalizes footnote markup emitted by
-* Ghost into a single accessible endnotes section and mirrors notes into the
-* right margin on wide viewports. This file is loaded unminified because the
-* theme's CSS minification pipeline is unavailable.
+* ## Notes
+*
+* -   This stylesheet is a companion to `js/footnotes.js`, which normalizes footnote markup emitted by Ghost into a single accessible endnotes section and mirrors notes into the right margin on wide viewports.
 */
 
 /*
 * Establish a positioning context for absolutely positioned sidenotes.
-* `position: relative` composes safely with the `.gh-canvas` grid.
+*
+* ## Notes
+*
+* -   `position: relative` composes safely with the `.gh-canvas` grid.
 */
 .gh-content.gh-canvas {
 	position: relative;
@@ -87,8 +89,6 @@
 
 /*
 * Highlight the jump target in both directions (ref -> note, note -> ref).
-* No animation is used; smooth scrolling is already disabled globally under
-* `prefers-reduced-motion` in `built/screen.css`.
 */
 .gh-footnotes li:target,
 .gh-fnref a:target {
@@ -98,9 +98,11 @@
 }
 
 /*
-* Progressive enhancement: highlight the whole superscript wrapper where
-* `:has()` is supported. Kept as a separate rule so browsers without `:has()`
-* do not drop the rule above (an invalid selector voids its entire list).
+* Progressive enhancement: highlight the whole superscript wrapper when `:has()` is supported.
+*
+* ## Notes
+*
+* -   This is kept as a separate rule so browsers without `:has()` do not drop the rule above (an invalid selector voids its entire list).
 */
 .gh-fnref:has(a:target) {
 	background: var(--code-background-color);
@@ -110,8 +112,10 @@
 
 /*
 * Margin sidenotes (aria-hidden visual clones of endnotes; see footnotes.js).
-* Hidden by default and hard-hidden below the wide-viewport threshold so a
-* missed JS deactivation cannot leak into narrow layouts.
+*
+* ## Notes
+*
+* -   Hidden by default and hard-hidden below the wide-viewport threshold so a missed JavaScript deactivation cannot leak into narrow layouts.
 */
 .gh-sidenote {
 	display: none;
@@ -123,15 +127,18 @@
 		position: absolute;
 
 		/*
-		* Reset the `.gh-canvas > *` grid placement: an absolutely positioned
-		* grid child with an explicit grid area is positioned relative to that
-		* area, whereas `auto` placement makes the grid container's padding
-		* box the containing block (which is what the JS layout math assumes).
+		* Reset the `.gh-canvas > *` grid placement.
+		*
+		* ## Notes
+		*
+		* -   An absolutely positioned grid child with an explicit grid area is positioned relative to that area, whereas `auto` placement makes the grid container's padding box the containing block (which is what the JavaScript layout math assumes).
 		*/
 		grid-column: auto;
 		grid-row: auto;
 
-		/* Cancel the `.gh-content > * + *` vertical-rhythm margin, which would offset the JS-computed `top`. */
+		/*
+		* Cancel the `.gh-content > * + *` vertical-rhythm margin, which would offset the JavaScript-computed `top`.
+		*/
 		margin: 0;
 		padding-top: 0.4rem;
 		border-top: 1px solid var(--hr-background-color);
@@ -145,7 +152,9 @@
 		font-weight: 600;
 	}
 
-	/* Links in clones remain visible but are made non-tabbable by JS. */
+	/*
+	* Links in clones remain visible but are made non-tabbable by JavaScript.
+	*/
 	.gh-content .gh-sidenote a {
 		color: inherit;
 		text-decoration: underline;
@@ -153,9 +162,12 @@
 }
 
 /*
-* Author asides (`<aside class="gh-aside">` in an HTML card). In-flow,
-* visually delineated block by default (all narrow viewports, and any wide
-* viewport where JS did not run). Long words (e.g., DOIs) must wrap.
+* Author asides (`<aside class="gh-aside">` in an HTML card).
+*
+* ## Notes
+*
+* -   In-flow, visually delineated block by default (all narrow viewports, and any wide viewport where JavaScript did not run).
+* -   Long words (e.g., DOIs) must wrap.
 */
 .gh-content .gh-aside {
 	padding: 1.2rem 1.6rem;
@@ -176,15 +188,19 @@
 }
 
 /*
-* Margin placement for asides on wide viewports. The `gh-aside--margin`
-* class is added by footnotes.js only while it is actively laying out the
-* margin column, so a JS failure degrades gracefully to the in-flow block.
+* Margin placement for asides on wide viewports.
+*
+* ## Notes
+*
+* -   The `gh-aside--margin` class is added by footnotes.js only while it is actively laying out the margin column, so a JavaScript failure degrades gracefully to the in-flow block.
 */
 @media (min-width: 1120px) {
 	.gh-content .gh-aside--margin {
 		position: absolute;
 
-		/* See the `.gh-sidenote` grid-placement reset above. */
+		/*
+		* See the `.gh-sidenote` grid-placement reset above.
+		*/
 		grid-column: auto;
 		grid-row: auto;
 		margin: 0;

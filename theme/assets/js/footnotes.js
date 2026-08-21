@@ -16,53 +16,46 @@
 * limitations under the License.
 */
 
+/* eslint-disable no-restricted-syntax */
+
 'use strict';
 
 /*
-* Footnote repair and margin sidenotes.
+* This script repairs footnotes and adds support for margin sidenotes.
 *
-* Ghost emits footnote markup in several inconsistent forms depending on how
-* content entered the editor:
+* ## Notes
 *
-* 1. Lexical editor paste: refs become `<a><sup>[N]</sup></a>` (no `href`),
-*    definitions become a trailing `<hr><ol><li>… <a>↩︎</a></li></ol>` (no
-*    `id` attributes), so nothing links.
-* 2. Markdown cards: each card renders footnotes independently, producing
-*    per-card `.footnotes` sections with duplicate ids and restarted
-*    numbering.
-* 3. Hand-rolled endnotes: `<sup><a href="#fn-1" id="ref-1">` refs paired
-*    with `id="fn-1"` note elements.
-* 4. Literal text: `[^1]` and `[^1]: …` that never rendered.
+* -   Ghost emits footnote markup in several inconsistent forms depending on how content entered the editor:
 *
-* This script normalizes all of the above into a single endnotes section with
-* sequential numbering, bidirectional links, and DPUB-ARIA roles. Footnotes
-* are endnotes-only by default; a post opts into also mirroring each note
-* into the right margin (on wide viewports) by tagging it `#sidenotes` in
-* Ghost (an internal tag — hidden from readers, surfaced to the theme via
-* Ghost's built-in `post_class` helper as `tag-hash-sidenotes` on `<article>`,
-* no template change required). Margin copies are `aria-hidden` visual
-* clones; the endnotes remain the canonical, interactive copy at every
-* viewport width. Author asides (`.gh-aside`) are margin-eligible
-* independently of this toggle — writing an `<aside>` is already an explicit
-* per-element request for margin placement, unlike automatic footnote
-* mirroring.
+*     1.  Lexical editor paste: refs become `<a><sup>[N]</sup></a>` (no `href`), definitions become a trailing `<hr><ol><li>...<a>↩︎</a></li></ol>` (no `id` attributes), so nothing links.
+*     2.  Markdown cards: each card renders footnotes independently, producing per-card `.footnotes` sections with duplicate ids and restarted numbering.
+*     3.  Hand-rolled endnotes: `<sup><a href="#fn-1" id="ref-1">` refs paired with `id="fn-1"` note elements.
+*     4.  Literal text: `[^1]` and `[^1]: …` that never rendered.
+*
+* -   This script normalizes all of the above into a single endnotes section with sequential numbering, bidirectional links, and DPUB-ARIA roles.
+*
+* -   Footnotes are endnotes-only by default; a post opts into also mirroring each note into the right margin (on wide viewports) by tagging it `#sidenotes` in Ghost (an internal tag, which is hidden from readers and surfaced to the theme via Ghost's built-in `post_class` helper as `tag-hash-sidenotes` on `<article>`).
+*
+* -   Margin copies are `aria-hidden` visual clones. The endnotes remain the canonical, interactive copy at every viewport width.
+*
+* -   Author asides (`.gh-aside`) are margin-eligible independently of this toggle. Writing an `<aside>` is already an explicit per-element request for margin placement, unlike automatic footnote mirroring.
 */
-(function main() { // eslint-disable-line no-restricted-syntax
-	var SIDENOTE_MEDIA = '(min-width: 1120px)';
-	var SIDENOTE_MIN_GUTTER = 160;
-	var SIDENOTE_GAP = 24;
-	var SIDENOTE_MAX_WIDTH = 240;
-	var SIDENOTE_SPACING = 12;
+(function main() {
 	var SIDENOTES_TAG_CLASS = 'tag-hash-sidenotes';
+	var SIDENOTE_MIN_GUTTER = 160; // px
+	var SIDENOTE_MAX_WIDTH = 240; // px
+	var SIDENOTE_SPACING = 12; // px
+	var SIDENOTE_MEDIA = '(min-width: 1120px)';
+	var SIDENOTE_GAP = 24; // px
 
-	var content;
-	var article;
 	var sidenotesEnabled;
-	var notes;
-	var refs;
 	var headingCandidate;
 	var sidenotes;
+	var content;
+	var article;
 	var asides;
+	var notes;
+	var refs;
 	var mql;
 
 	content = document.querySelector( '.gh-article .gh-content' );
@@ -70,7 +63,7 @@
 		return;
 	}
 	article = content.closest( '.gh-article' );
-	sidenotesEnabled = !!( article && article.classList.contains( SIDENOTES_TAG_CLASS ) );
+	sidenotesEnabled = Boolean( article && article.classList.contains( SIDENOTES_TAG_CLASS ) );
 	notes = []; // [ { 'el': Element, 'html': string, 'number': int, 'refIds': [ string ] } ]
 	refs = []; // [ { 'wrapper': Element, 'note': object } ]
 	headingCandidate = null;
@@ -95,38 +88,37 @@
 	}
 
 	/**
-	* Finds footnote references and definitions across all supported markup
-	* patterns, populating `refs` (document order) and `notes`.
+	* Finds footnote references and definitions across all supported markup patterns, populating `refs` (document order) and `notes`.
 	*
 	* @private
 	*/
 	function collect() {
 		var containers;
-		var byEl;
+		var map;
 		var el;
 		var i;
 
-		byEl = new Map(); // note Element -> note object
+		map = new Map(); // note Element -> note object
 		containers = noteContainers();
 
-		// Patterns 2 and 3: anchors with fragment hrefs...
-		collectLinkedRefs( byEl, containers );
+		// Patterns 2 and 3: anchors with fragment hrefs
+		collectLinkedRefs( map, containers );
 
-		// Pattern 1: href-less Lexical refs paired with `↩︎` lists...
-		collectLexicalRefs( byEl, containers.lexical );
+		// Pattern 1: href-less Lexical refs paired with `↩︎` lists
+		collectLexicalRefs( map, containers.lexical );
 
-		// Pattern 4: literal `[^label]` text...
-		collectLiteralRefs( byEl );
+		// Pattern 4: literal `[^label]` text
+		collectLiteralRefs( map );
 
-		// Order references by document position...
+		// Order references by document position:
 		refs.sort( documentOrder );
 
 		// Assign sequential numbers in document order (repeat refs to the same note reuse its number)...
 		for ( i = 0; i < refs.length; i++ ) {
 			el = refs[ i ].note.el;
-			if ( !byEl.get( el ).number ) {
-				byEl.get( el ).number = notes.length + 1;
-				notes.push( byEl.get( el ) );
+			if ( !map.get( el ).number ) {
+				map.get( el ).number = notes.length + 1;
+				notes.push( map.get( el ) );
 			}
 		}
 	}
@@ -191,10 +183,10 @@
 	* Collects refs whose anchors carry fragment hrefs (markdown cards and hand-rolled endnotes).
 	*
 	* @private
-	* @param {Map} byEl - note registry
+	* @param {Map} registry - note registry
 	* @param {Object} containers - note containers
 	*/
-	function collectLinkedRefs( byEl, containers ) {
+	function collectLinkedRefs( registry, containers ) {
 		var anchors;
 		var frag;
 		var a;
@@ -217,7 +209,7 @@
 			}
 			el = resolveFragment( frag, a );
 			if ( el ) {
-				addRef( byEl, refWrapper( a ), el );
+				addRef( registry, refWrapper( a ), el );
 			}
 		}
 	}
@@ -225,22 +217,23 @@
 	/**
 	* Collects href-less refs, pairing displayed numbers with list items positionally.
 	*
+	* ## Notes
+	*
 	* Handles two nesting orientations, both of which arrive with attributes stripped:
 	*
 	* -   Lexical paste: `<a><sup>N</sup></a>` (anchor wraps sup).
-	* -   Theme's own output re-ingested through Ghost: `<sup class="gh-fnref"><a>N</a></sup>`
-	*     (sup wraps anchor). The equivalent shape with `.footnote-ref` covers stripped
-	*     markdown-card output too.
+	* -   Theme's own output re-ingested through Ghost: `<sup class="gh-fnref"><a>N</a></sup>` (sup wraps anchor). The equivalent shape with `.footnote-ref` covers stripped markdown-card output, too.
 	*
 	* @private
-	* @param {Map} byEl - note registry
+	* @param {Map} registry - note registry
 	* @param {Array} lists - qualifying Lexical-shaped note lists
 	*/
-	function collectLexicalRefs( byEl, lists ) {
+	function collectLexicalRefs( registry, lists ) {
 		var elements;
 		var list;
 		var sup;
 		var el;
+		var o;
 		var m;
 		var n;
 		var i;
@@ -249,12 +242,16 @@
 		if ( !lists.length ) {
 			return;
 		}
+		o = {
+			'sections': [],
+			'lexical': lists
+		};
 		elements = toArray( content.querySelectorAll( 'a:not([href]) > sup, sup.gh-fnref > a:not([href]), sup.footnote-ref > a:not([href])' ) );
 		for ( i = 0; i < elements.length; i++ ) {
 			el = elements[ i ];
-			sup = el.tagName === 'SUP' ? el : el.parentElement;
+			sup = ( el.tagName === 'SUP' ) ? el : el.parentElement;
 			m = /^\[?(\d+)\]?$/.exec( sup.textContent.trim() );
-			if ( !m || insideContainer( sup, { 'sections': [], 'lexical': lists } ) ) {
+			if ( !m || insideContainer( sup, o ) ) {
 				continue;
 			}
 			n = parseInt( m[ 1 ], 10 );
@@ -269,18 +266,18 @@
 			}
 			list = list || lists[ lists.length - 1 ];
 			if ( n >= 1 && n <= list.children.length ) {
-				addRef( byEl, refWrapper( sup ), list.children[ n - 1 ] );
+				addRef( registry, refWrapper( sup ), list.children[ n - 1 ] );
 			}
 		}
 	}
 
 	/**
-	* Collects literal `[^label]` refs and `[^label]: …` definition paragraphs.
+	* Collects literal `[^label]` refs and `[^label]: ...` definition paragraphs.
 	*
 	* @private
-	* @param {Map} byEl - note registry
+	* @param {Map} registry - note registry
 	*/
-	function collectLiteralRefs( byEl ) {
+	function collectLiteralRefs( registry ) {
 		var defsByLabel;
 		var paragraphs;
 		var walker;
@@ -290,7 +287,7 @@
 		var p;
 		var i;
 
-		// Definitions: paragraphs beginning with `[^label]:`...
+		// Definitions: paragraphs beginning with `[^label]:`
 		defsByLabel = {};
 		paragraphs = toArray( content.querySelectorAll( 'p' ) );
 		for ( i = 0; i < paragraphs.length; i++ ) {
@@ -314,7 +311,7 @@
 			m = /\[\^([^\]\s]+)\](?!:)/.exec( text );
 			if ( m && defsByLabel[ m[ 1 ] ] ) {
 				// The remainder text node is visited next, so repeated refs within one text node are handled naturally...
-				splitLiteralRef( byEl, node, m, defsByLabel[ m[ 1 ] ] );
+				splitLiteralRef( registry, node, m, defsByLabel[ m[ 1 ] ] );
 			}
 			node = walker.nextNode();
 		}
@@ -339,12 +336,12 @@
 	* Splits a text node around a literal `[^label]` match, inserting a placeholder ref element.
 	*
 	* @private
-	* @param {Map} byEl - note registry
+	* @param {Map} registry - note registry
 	* @param {Node} node - text node containing the match
 	* @param {Array} m - regexp match
 	* @param {Element} def - definition paragraph
 	*/
-	function splitLiteralRef( byEl, node, m, def ) {
+	function splitLiteralRef( registry, node, m, def ) {
 		var placeholder;
 		var rest;
 
@@ -352,19 +349,19 @@
 		rest.nodeValue = rest.nodeValue.slice( m[ 0 ].length );
 		placeholder = document.createElement( 'sup' );
 		node.parentNode.insertBefore( placeholder, rest );
-		addRef( byEl, placeholder, def );
+		addRef( registry, placeholder, def );
 	}
 
 	/**
 	* Registers a reference and its note element.
 	*
 	* @private
-	* @param {Map} byEl - note registry
+	* @param {Map} registry - note registry
 	* @param {Element} wrapper - reference element to be replaced
 	* @param {Element} el - note element (list item or paragraph)
 	*/
-	function addRef( byEl, wrapper, el ) {
-		var note = byEl.get( el );
+	function addRef( registry, wrapper, el ) {
+		var note = registry.get( el );
 		if ( !note ) {
 			note = {
 				'el': el,
@@ -372,7 +369,7 @@
 				'number': 0,
 				'refIds': []
 			};
-			byEl.set( el, note );
+			registry.set( el, note );
 		}
 		refs.push({
 			'wrapper': wrapper,
@@ -501,9 +498,18 @@
 		for ( i = 0; i < links.length; i++ ) {
 			a = links[ i ];
 			if (
-				( !a.getAttribute( 'href' ) && a.textContent.indexOf( '↩' ) !== -1 ) ||
+				(
+					!a.getAttribute( 'href' ) &&
+					a.textContent.indexOf( '↩' ) !== -1
+				) ||
 				a.classList.contains( 'footnote-backref' ) ||
-				( fragment( a ) && ( fragment( a ).indexOf( 'fnref' ) === 0 || fragment( a ).indexOf( 'ref-' ) === 0 ) )
+				(
+					fragment( a ) &&
+					(
+						fragment( a ).indexOf( 'fnref' ) === 0 ||
+						fragment( a ).indexOf( 'ref-' ) === 0
+					)
+				)
 			) {
 				a.remove();
 			}
@@ -578,8 +584,8 @@
 	*/
 	function activate() {
 		var contentRect;
-		var entries;
 		var mainRight;
+		var entries;
 		var gutter;
 		var bottom;
 		var probe;
@@ -753,7 +759,15 @@
 	function refWrapper( el ) {
 		var w = el;
 		var p = w.parentElement;
-		while ( p && ( p.tagName === 'SUP' || p.tagName === 'A' ) && p.children.length === 1 && p.textContent.trim() === w.textContent.trim() ) {
+		while (
+			p &&
+			(
+				p.tagName === 'SUP' ||
+				p.tagName === 'A'
+			) &&
+			p.children.length === 1 &&
+			p.textContent.trim() === w.textContent.trim()
+		) {
 			w = p;
 			p = w.parentElement;
 		}
@@ -811,13 +825,11 @@
 	* @returns {boolean} boolean result
 	*/
 	function follows( a, b ) {
-		/* eslint-disable no-bitwise */
-		return ( b.compareDocumentPosition( a ) & Node.DOCUMENT_POSITION_FOLLOWING ) !== 0;
-		/* eslint-enable no-bitwise */
+		return ( b.compareDocumentPosition( a ) & Node.DOCUMENT_POSITION_FOLLOWING ) !== 0; // eslint-disable-line no-bitwise
 	}
 
 	/**
-	* Comparator ordering references by document position.
+	* Comparator which orders references by document position.
 	*
 	* @private
 	* @param {Object} a - first reference
@@ -832,7 +844,7 @@
 	}
 
 	/**
-	* Comparator ordering margin entries by desired vertical position.
+	* Comparator which orders margin entries by desired vertical position.
 	*
 	* @private
 	* @param {Object} a - first entry
@@ -889,9 +901,16 @@
 	*/
 	function debounce( fcn, ms ) {
 		var id;
-		return function debounced() {
+		return debounced;
+
+		/**
+		* Function wrapper.
+		*
+		* @private
+		*/
+		function debounced() {
 			clearTimeout( id );
 			id = setTimeout( fcn, ms );
-		};
+		}
 	}
 })();
