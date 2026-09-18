@@ -22,3 +22,16 @@
 figcaption {
 	text-align: left;
 }
+
+/*
+* Links in figure captions should look like links.
+*
+* ## Notes
+*
+* -   `built/screen.css` gives `.gh-content figcaption a` the body text color and no underline, which leaves a caption link with no visual cue at all -- neither color nor decoration (WCAG 2.2 SC 1.4.1).
+* -   Matching `--link-color` also makes a caption link consistent with a link in the surrounding prose.
+*/
+.gh-content figcaption a {
+	color: var(--link-color);
+	text-decoration: underline;
+}

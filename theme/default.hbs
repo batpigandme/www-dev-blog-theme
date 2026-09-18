@@ -49,11 +49,16 @@ limitations under the License.
 		.gh-content a,
 		a.gh-card-link .gh-card-date {
 			color: var(--link-color);
-			text-decoration: none;
 		}
 
-		.gh-content a:hover,
-		.gh-content a:active {
+		/*
+		* Links in post content should be underlined, not signalled by color alone.
+		*
+		* ## Notes
+		*
+		* -   WCAG 2.2 SC 1.4.1 (Use of Color): a link inside a block of text needs a non-color cue. Underlining on hover only does not satisfy it, because it is unavailable to a reader who is not pointing at the link.
+		*/
+		.gh-content a {
 			text-decoration: underline;
 		}
 
@@ -86,6 +91,17 @@ limitations under the License.
 
 		.gh-foot-menu .nav li + li::before {
 			content: "/";
+		}
+
+		/*
+		* Preserve the previous/next post title line-height.
+		*
+		* ## Notes
+		*
+		* -   The titles in `post.hbs` are no longer `h4` elements (they were the only `h4` on a post page and produced a heading-level skip), so they no longer pick up the `h1`-`h6` line-height from `built/screen.css`.
+		*/
+		.gh-navigation-title {
+			line-height: 1.15;
 		}
 
 		@media (max-width: 767px) {

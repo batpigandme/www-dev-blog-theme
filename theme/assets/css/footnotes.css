@@ -42,12 +42,19 @@
 	line-height: 0;
 }
 
+/*
+* Footnote reference anchors should be underlined, not signalled by color alone.
+*
+* ## Notes
+*
+* -   WCAG 2.2 SC 1.4.1 (Use of Color): the superscript numeral marks the text as a footnote, but only the color marks it as a link.
+*/
 .gh-content .gh-fnref a {
 	padding: 0 0.15em;
 	color: var(--link-color);
 	font-size: 0.75em;
 	font-variant-numeric: tabular-nums;
-	text-decoration: none;
+	text-decoration: underline;
 }
 
 .gh-content .gh-fnref a:focus-visible,

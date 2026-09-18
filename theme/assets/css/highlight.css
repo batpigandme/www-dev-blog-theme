@@ -110,3 +110,16 @@
 		font-weight: bold;
 	}
 }
+
+/*
+* Inline code should use the same text color as highlighted code blocks.
+*
+* ## Notes
+*
+* -   `built/screen.css` colors inline code with `--ghost-accent-color`, which is a Ghost admin setting rather than a theme token, and which does not reach the 4.5:1 WCAG AA minimum against the inline code background.
+* -   `--code-color` is already the declared text color for code in `themes/{light,dark}/main.css`, so this also brings inline code into line with `pre` blocks.
+* -   The selector is scoped to `.gh-content` so that it outranks the unscoped `:not(pre) > code` rule in `built/screen.css` on specificity, without depending on stylesheet order.
+*/
+.gh-content :not(pre) > code {
+	color: var(--code-color);
+}
