@@ -13,3 +13,19 @@ Applies equally to `git push --set-upstream`, force-pushes, tag pushes, `ai-conf
 Read-only `git fetch` / `git ls-remote` / `gh` view/list commands are fine and don't need confirmation.
 
 **PRs and issues:** never run `gh pr create`, `gh pr edit`, `gh issue create`, `gh pr comment`, or equivalent, on any repo, even with explicit go-ahead. Drafting the title/description/body as a local artifact for her to paste in is fine and encouraged; filing and editing are always hers.
+
+## Local Ghost instance
+
+The local Ghost lives in `ghost/` (gitignored), registered with ghost-cli as `ghost-stdlib-1`, at `http://localhost:2368`. Full setup and history: `~/stdlib-notes/ghost/local-ghost-instance-setup.md`.
+
+**`ghost` is only on `PATH` after loading nvm's Node 22.** ghost-cli is installed globally inside nvm's Node 22, and Mara's default Node is deliberately *not* 22, so a fresh shell says `zsh: command not found: ghost`. Prefix every `ghost` command, from inside `ghost/`:
+
+```bash
+source ~/.nvm/nvm.sh && nvm use 22 && ghost stop
+```
+
+Same for `ghost start`, `ghost restart`, and `ghost ls`. When giving Mara a command to run, give her the whole line, not bare `ghost stop`.
+
+**Don't** fix this by setting `nvm alias default 22` or editing `~/.zshrc`: Mara keeps a different default Node on purpose.
+
+**Don't use `make dev-restart`:** it stops `ghost-stdlib`, the old worktree's instance, not this one. Redeploy the theme with `make dev-deploy` (copies whatever `theme/` is checked out), then `ghost restart` as above.
