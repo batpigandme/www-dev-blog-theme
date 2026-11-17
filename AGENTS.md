@@ -24,8 +24,8 @@ The local Ghost lives in `ghost/` (gitignored), registered with ghost-cli as `gh
 source ~/.nvm/nvm.sh && nvm use 22 && ghost stop ghost-stdlib-1
 ```
 
-Same for `ghost start ghost-stdlib-1` and `ghost restart ghost-stdlib-1`; `ghost ls` needs no name. When giving Mara a command to run, give her this whole line, not bare `ghost stop`.
+Same for `ghost start ghost-stdlib-1`; `ghost ls` needs no name. **`ghost restart` takes no name** (it fails with the same "not a recognisable Ghost installation" error), so point it at the folder instead: `ghost restart --dir ~/www-dev-blog-theme/ghost`. `--dir` works with every command. When giving Mara a command to run, give her this whole line, not bare `ghost stop`.
 
 **Don't** fix this by setting `nvm alias default 22` or editing `~/.zshrc`: Mara keeps a different default Node on purpose.
 
-**Don't use `make dev-restart`:** it stops `ghost-stdlib`, the old worktree's instance, not this one. Redeploy the theme with `make dev-deploy` (copies whatever `theme/` is checked out), then `ghost restart ghost-stdlib-1` as above.
+**Don't use `make dev-restart`:** it stops `ghost-stdlib`, the old worktree's instance, not this one. Redeploy the theme with `make dev-deploy` (copies whatever `theme/` is checked out), then `ghost restart --dir ~/www-dev-blog-theme/ghost` as above.
