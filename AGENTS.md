@@ -18,14 +18,14 @@ Read-only `git fetch` / `git ls-remote` / `gh` view/list commands are fine and d
 
 The local Ghost lives in `ghost/` (gitignored), registered with ghost-cli as `ghost-stdlib-1`, at `http://localhost:2368`. Full setup and history: `~/stdlib-notes/ghost/local-ghost-instance-setup.md`.
 
-**`ghost` is only on `PATH` after loading nvm's Node 22.** ghost-cli is installed globally inside nvm's Node 22, and Mara's default Node is deliberately *not* 22, so a fresh shell says `zsh: command not found: ghost`. Prefix every `ghost` command, from inside `ghost/`:
+**`ghost` is only on `PATH` after loading nvm's Node 22.** ghost-cli is installed globally inside nvm's Node 22, and Mara's default Node is deliberately *not* 22, so a fresh shell says `zsh: command not found: ghost`. Load Node 22 on the same line, and name the instance so the command works from any directory (without a name, ghost-cli only finds the install from inside `ghost/` and otherwise says "Working directory is not a recognisable Ghost installation"):
 
 ```bash
-source ~/.nvm/nvm.sh && nvm use 22 && ghost stop
+source ~/.nvm/nvm.sh && nvm use 22 && ghost stop ghost-stdlib-1
 ```
 
-Same for `ghost start`, `ghost restart`, and `ghost ls`. When giving Mara a command to run, give her the whole line, not bare `ghost stop`.
+Same for `ghost start ghost-stdlib-1` and `ghost restart ghost-stdlib-1`; `ghost ls` needs no name. When giving Mara a command to run, give her this whole line, not bare `ghost stop`.
 
 **Don't** fix this by setting `nvm alias default 22` or editing `~/.zshrc`: Mara keeps a different default Node on purpose.
 
-**Don't use `make dev-restart`:** it stops `ghost-stdlib`, the old worktree's instance, not this one. Redeploy the theme with `make dev-deploy` (copies whatever `theme/` is checked out), then `ghost restart` as above.
+**Don't use `make dev-restart`:** it stops `ghost-stdlib`, the old worktree's instance, not this one. Redeploy the theme with `make dev-deploy` (copies whatever `theme/` is checked out), then `ghost restart ghost-stdlib-1` as above.
